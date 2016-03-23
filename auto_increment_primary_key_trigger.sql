@@ -10,7 +10,6 @@
 --------------------------------------------------------
 -- 1-  DDL for Sequence EMP_ID_SEQ 
 --------------------------------------------------------
-1- DDL for Sequence EMP_ID_SEQ 
 CREATE SEQUENCE  "EMP_ID_SEQ"  MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE ;
 
 --------------------------------------------------------
@@ -27,16 +26,18 @@ CREATE TABLE "EMPS"
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
   TABLESPACE "EMPS_TBS" ;
   
-  Insert into EMPS (EMP_FIRSTNAME,EMP_LASTNAME,EMP_SAL) values ('JHONE','SMITH',5500);
-  
-  CREATE UNIQUE INDEX "PRIMARY_EMP" ON "PRODUCT_SPECIAL" ("EMP_ID") 
+ 
+--------------------------------------------------------
+-- 3-  DDL for Table AFFILIATE
+--------------------------------------------------------
+  CREATE UNIQUE INDEX "PRIMARY_EMP" ON "EMPS" ("EMP_ID") 
   PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
   STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
   PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1 BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
   TABLESPACE "USERS" ;
   
 --------------------------------------------------------
---  DDL for Trigger EMP_ID_TRG
+-- 4 DDL for Trigger EMP_ID_TRG
 --------------------------------------------------------
 CREATE OR REPLACE TRIGGER "EMP_ID_TRG" BEFORE INSERT ON EMPS
 FOR EACH ROW
@@ -65,3 +66,8 @@ BEGIN
 END;
 /
 ALTER TRIGGER "EMP_ID_TRG" ENABLE;
+
+--------------------------------------------------------
+-- 5 Test Script
+--------------------------------------------------------
+Insert into EMPS (EMP_FIRSTNAME,EMP_LASTNAME,EMP_SAL) values ('JHONE','SMITH',5500);
