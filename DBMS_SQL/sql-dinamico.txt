@@ -1,0 +1,173 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+---
+
+CREATE OR REPLACE PROCEDURE exec (STRING IN varchar2) AS
+    cursor_name INTEGER;
+    ret         INTEGER;
+BEGIN
+   cursor_name := DBMS_SQL.OPEN_CURSOR;
+   DBMS_SQL.PARSE(cursor_name, string, DBMS_SQL.native);
+   ret := DBMS_SQL.EXECUTE(cursor_name);
+   DBMS_SQL.CLOSE_CURSOR(cursor_name);
+END;
+
+---
+
+CREATE OR REPLACE PROCEDURE copy ( 
+     source      IN VARCHAR2, 
+     destination IN VARCHAR2) IS 
+
+     id_var             NUMBER; 
+     name_var           VARCHAR2(30); 
+     birthdate_var      DATE; 
+
+     source_cursor      INTEGER; 
+     destination_cursor INTEGER; 
+     ignore             INTEGER; 
+
+  BEGIN 
+ 
+  -- Prepare a cursor to select from the source table: 
+     source_cursor := dbms_sql.open_cursor; 
+     DBMS_SQL.PARSE(source_cursor, 
+         'SELECT id, name, birthdate FROM ' || source, 
+          DBMS_SQL.native); 
+     DBMS_SQL.DEFINE_COLUMN(source_cursor, 1, id_var); 
+     DBMS_SQL.DEFINE_COLUMN(source_cursor, 2, name_var, 30); 
+     DBMS_SQL.DEFINE_COLUMN(source_cursor, 3, birthdate_var); 
+     ignore := DBMS_SQL.EXECUTE(source_cursor); 
+ 
+  -- Prepare a cursor to insert into the destination table: 
+     destination_cursor := DBMS_SQL.OPEN_CURSOR; 
+     DBMS_SQL.PARSE(destination_cursor, 
+                  'INSERT INTO ' || destination || 
+                  ' VALUES (:id_bind, :name_bind, :birthdate_bind)', 
+                   DBMS_SQL.native); 
+ 
+  -- Fetch a row from the source table and insert it into the destination table: 
+     LOOP 
+       IF DBMS_SQL.FETCH_ROWS(source_cursor)>0 THEN 
+         -- get column values of the row 
+         DBMS_SQL.COLUMN_VALUE(source_cursor, 1, id_var); 
+         DBMS_SQL.COLUMN_VALUE(source_cursor, 2, name_var); 
+         DBMS_SQL.COLUMN_VALUE(source_cursor, 3, birthdate_var); 
+ 
+  -- Bind the row into the cursor that inserts into the destination table. You 
+  -- could alter this example to require the use of dynamic SQL by inserting an 
+  -- if condition before the bind. 
+        DBMS_SQL.BIND_VARIABLE(destination_cursor, ':id_bind', id_var); 
+        DBMS_SQL.BIND_VARIABLE(destination_cursor, ':name_bind', name_var); 
+        DBMS_SQL.BIND_VARIABLE(destination_cursor, ':birthdate_bind', birthdate_var); 
+        ignore := DBMS_SQL.EXECUTE(destination_cursor); 
+      ELSE 
+ 
+  -- No more rows to copy: 
+        EXIT; 
+      END IF; 
+    END LOOP; 
+ 
+  -- Commit and close all cursors: 
+     COMMIT; 
+     DBMS_SQL.CLOSE_CURSOR(source_cursor); 
+     DBMS_SQL.CLOSE_CURSOR(destination_cursor); 
+   EXCEPTION 
+     WHEN OTHERS THEN 
+       IF DBMS_SQL.IS_OPEN(source_cursor) THEN 
+         DBMS_SQL.CLOSE_CURSOR(source_cursor); 
+       END IF; 
+       IF DBMS_SQL.IS_OPEN(destination_cursor) THEN 
+         DBMS_SQL.CLOSE_CURSOR(destination_cursor); 
+       END IF; 
+       RAISE; 
+  END; 
+/ 
+
+
+---
+
+CREATE TABLE sales
+    ( invoice_no NUMBER, 
+      sale_year  INT NOT NULL,
+      sale_month INT NOT NULL,
+      sale_day   INT NOT NULL )
+  PARTITION BY RANGE (sale_year, sale_month, sale_day)
+    ( PARTITION sales_7t1 VALUES LESS THAN (1997, 04, 01) 
+        TABLESPACE tsa,
+      PARTITION sales_7t2 VALUES LESS THAN (1997, 07, 01) 
+        TABLESPACE tsb,
+      PARTITION sales_7t3 VALUES LESS THAN (1997, 10, 01) 
+        TABLESPACE tsc,
+      PARTITION sales_7t4 VALUES LESS THAN (1998, 01, 01) 
+        TABLESPACE tsd ); 
+
+ALTER TABLE sales 
+      ADD PARTITION sales_8t1 VALUES LESS THAN (1998, 04, 01) 
+      TABLESPACE tse;
+
+ALTER TABLE sales DROP PARTITION sales_8t1;
+
+ALTER TABLE sales 
+      MERGE PARTITIONS sales_7t1, sales_7t2 INTO PARTITION sales_7s1;
+
+ALTER TABLE sales 
+      SPLIT PARTITION 
+      sales_7s1 at (1997, 04, 01) INTO ( 
+           PARTITION sales_7t1
+           TABLESPACE tsa,
+           PARTITION sales_7t2
+           TABLESPACE tsb);
+
+ALTER TABLE sales 
+      MOVE PARTITION sales_7t4 
+      TABLESPACE tsf;
+
+ALTER TABLE sales TRUNCATE PARTITION sales_7t4;
+
+---
+
+CREATE CLUSTER emp_dept (deptno NUMBER(3))
+   PCTFREE 5
+   TABLESPACE users
+   STORAGE (INITIAL 200K
+      NEXT 300K
+      MINEXTENTS 2
+      MAXEXTENTS 20
+      PCTINCREASE 33);
+
+CREATE TABLE dept (
+   deptno NUMBER(3) PRIMARY KEY, . . . )
+   CLUSTER emp_dept (deptno);
+
+CREATE TABLE emp (
+   empno NUMBER(5) PRIMARY KEY,
+   ename VARCHAR2(15) NOT NULL,
+   . . .
+   deptno NUMBER(3) REFERENCES dept)
+   CLUSTER emp_dept (deptno);  
+
+CREATE INDEX emp_dept_index
+   ON CLUSTER emp_dept
+   TABLESPACE users
+   STORAGE (INITIAL 50K
+      NEXT 50K
+      MINEXTENTS 2
+      MAXEXTENTS 10
+      PCTINCREASE 33)
+   PCTFREE 5;
+
+---
+
+CREATE TABLE docindex(
+        token char(20), 
+        doc_id NUMBER,
+        token_frequency NUMBER,
+        token_offsets VARCHAR2(512),
+        CONSTRAINT pk_docindex PRIMARY KEY (token, doc_id))
+    ORGANIZATION INDEX TABLESPACE ind_tbs
