@@ -1,0 +1,129 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+CONNECT sys/oracle  AS SYSDBA
+drop TABLESPACE "RMAN" INCLUDING CONTENTS;
+drop user rman cascade;
+------------------------------
+CREATE TABLESPACE "RMAN" 
+DATAFILE 'C:\temp\RMAN01.DBF' SIZE 6208K REUSE
+AUTOEXTEND ON NEXT 64K MAXSIZE 32767M
+EXTENT MANAGEMENT LOCAL
+SEGMENT SPACE MANAGEMENT AUTO;
+------------------------------
+CREATE USER rman IDENTIFIED BY rman
+TEMPORARY TABLESPACE temp 
+DEFAULT TABLESPACE rman 
+QUOTA UNLIMITED ON rman;
+------------------------------
+GRANT connect, resource, recovery_catalog_owner TO rman;
+------------------------------
+rman catalog=rman/rman@orcl
+------------------------------
+create catalog tablespace "RMAN";
+------------------------------
+exit
+------------------------------
+rman catalog=rman/rman@orcl target=sys/oracle@orcl
+-- in Auxiliary  case 
+rman catalog=rman/rman@orcl Auxiliary target=sys/oracle@orcl
+------------------------------
+register database;
+------------------------------
+Existing user-created backups can be added to the catalog using:
+
+    RMAN> catalog datafilecopy 'C:\Oracle\Oradata\TSH1.dbf';
+    RMAN> catalog archivelog 'log1', 'log2', 'log3', ... 'logN';
+------------------------------
+RMAN> configure retention policy to recovery window of 7 days;
+RMAN> configure default device type to disk;
+RMAN> configure controlfile autobackup on;
+RMAN> configure channel device type disk format 'C:\temp\Backup%d_DB_%u_%s_%p';
+---------------------------------
+sql > shutdown immediate;
+sql > startup mount;
+sql > alter database archivelog;
+sql > alter database open;
+------------------------------
+--Start SQL*Plus and archive all unarchived logs, including the current log:
+SQL> ALTER SYSTEM ARCHIVE LOG CURRENT;
+
+RMAN> 
+run {
+   BACKUP DATABASE plus archivelog; 
+   delete noprompt obsolete;
+ }
+------------------------------
+-- backup table space;
+-- write tablespace in capital letter
+run
+{
+ALLOCATE CHANNEL c1 DEVICE TYPE DISK;
+BACKUP TABLESPACE "users";
+}
+------------------------------
+RMAN> resync catalog;
+------------------------------
+---- Start the Auxiliary Instance
+CONNECT SYS/oracle@aux AS SYSDBA
+-- start instance with the server parameter file
+STARTUP FORCE NOMOUNT
+------------------------------
+-- recover & restore in this case
+shutdown immediate; # use abort if this fails
+     startup mount;
+     restore database;
+     recover database;
+     alter database open;
+RUN 
+{
+ALLOCATE CHANNEL c1 DEVICE TYPE DISK;
+#restore tablespace "RMAN";
+RECOVER TABLESPACE "RMAN" UNTIL TIME "TO_DATE('2007-27-08:11:00:00','yyyy-dd-mm:hh24:mi:ss')";
+}
+
+
+CREATE GLOBAL SCRIPT global_full_backup
+{
+ALLOCATE CHANNEL c1 DEVICE TYPE DISK;
+RECOVER TABLESPACE "RMAN" UNTIL TIME "TO_DATE('2007-27-08:11:00:00','yyyy-dd-mm:hh24:mi:ss')";
+}
+
+RUN { EXECUTE SCRIPT
+full_backup
+; }
+------------------------------
+run 
+{
+     shutdown immediate; # use abort if this fails
+     startup mount;
+     restore database;
+     recover database;
+     alter database open;
+}
+
+BACKUP tablespace users TIME BETWEEN  'SYSDATE-1' AND 'SYSDATE'; 
+
+#### another case
+run 
+{
+  sql 'ALTER TABLESPACE RMAN OFFLINE IMMEDIATE';
+  #SET UNTIL TIME "TO_DATE('2007-26-08:19:00:00','yyyy-dd-mm:hh24:mi:ss')";
+  restore tablespace "RMAN";
+  #recover tablespace RMAN;
+  RECOVER TABLESPACE "RMAN";
+  sql 'ALTER TABLESPACE RMAN ONLINE'; 
+}
+
+
+RECOVER TABLESPACE users UNTIL TIME 'Agust 26 2007, 23:00:00';
+
+RECOVER TABLESPACE users UNTIL SEQUENCE 1300 THREAD 1;
+
+-- conn in AUXILIARY  mode
+rman catalog=rman/rman@orcl AUXILIARY SYS/aux target=sys/oracle@orcl

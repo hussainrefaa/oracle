@@ -1,0 +1,46 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+-- must to follow this steps:
+1) shut abort
+2) startup mount
+3) restore (bring the file from backup) &
+   recovery (from archives redo logs)
+4) alter database open
+
+example :
+sql>   shut immediate
+-- delete system01.dbf from os
+conn sys/password@newh as sysdba
+C:\>sqlplus
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue Mar 4 15:22:35 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+Enter user-name: sys/password as sysdba
+Connected to an idle instance.
+
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area  612368384 bytes
+Fixed Size                  1250428 bytes
+Variable Size             176163716 bytes
+Database Buffers          427819008 bytes
+Redo Buffers                7135232 bytes
+Database mounted.
+ORA-01157: cannot identify/lock data file 1 - see DBWR trace file
+ORA-01110: data file 1: 'D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\SYSTEM01.DBF'
+
+c:\ rman target sys/password@newh catalog hussen/password@catalog
+rman>  run
+{
+  restore datafile 'd:\oracle\product\10.2.0\oradata\newh\system01.dbf';
+  recover datafile 'd:\oracle\product\10.2.0\oradata\newh\system01.dbf';
+}

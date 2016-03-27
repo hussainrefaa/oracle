@@ -1,0 +1,52 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+CONNECT sys/oracle  AS SYSDBA
+------------------------------
+CREATE TABLESPACE "RMAN" 
+DATAFILE 'C:\temp\RMAN01.DBF' SIZE 6208K REUSE
+AUTOEXTEND ON NEXT 64K MAXSIZE 32767M
+EXTENT MANAGEMENT LOCAL
+SEGMENT SPACE MANAGEMENT AUTO;
+------------------------------
+CREATE USER rman IDENTIFIED BY rman
+TEMPORARY TABLESPACE temp 
+DEFAULT TABLESPACE rman 
+QUOTA UNLIMITED ON rman;
+------------------------------
+GRANT connect, resource, recovery_catalog_owner TO rman;
+------------------------------
+rman catalog=rman/rman@orcl
+------------------------------
+create catalog tablespace "RMAN";
+------------------------------
+exit
+------------------------------
+rman catalog=rman/rman@orcl target=sys/oracle@orcl
+------------------------------
+register database;
+------------------------------
+sql> ALTER SYSTEM SET DB_RECOVERY_FILE_DEST = 'c:\temp';
+sql> ALTER SYSTEM SET DB_RECOVERY_FILE_DEST_SIZE = 2G;
+sql> ALTER SYSTEM SET DB_FLASHBACK_RETENTION_TARGET = 1440;
+
+sql > shutdown immediate;
+sql > startup mount;
+sql > alter database open;
+
+rman>
+CREATE GLOBAL SCRIPT full_backup 
+{
+  BACKUP DATABASE PLUS ARCHIVELOG;
+  DELETE FORCE NOPROMPT OBSOLETE;
+}
+
+RUN { EXECUTE GLOBAL SCRIPT full_backup; }
+
+RESTORE DATABASE PREVIEW SUMMARY;
+

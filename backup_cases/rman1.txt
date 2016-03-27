@@ -1,0 +1,74 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+sql>CREATE TABLESPACE cattbs1 DATAFILE 
+     'c:\temp\cattbs1.dbf' SIZE 50M
+     AUTOEXTEND OFF
+     BLOCKSIZE 8192
+     FORCE LOGGING
+     DEFAULT NOCOMPRESS
+     EXTENT MANAGEMENT LOCAL UNIFORM SIZE 64K
+     SEGMENT SPACE MANAGEMENT AUTO
+     FLASHBACK ON
+     ONLINE;
+--------------------------------------------------
+sql>CREATE USER omega
+     IDENTIFIED BY omega
+     DEFAULT TABLESPACE cattbs1
+     TEMPORARY TABLESPACE temp
+     QUOTA UNLIMITED ON cattbs1;
+--------------------------------------------------
+sql>GRANT create session TO omega;
+sql>GRANT resource TO omega;
+sql>GRANT recovery_catalog_owner TO omega;
+sql>GRANT execute ON dbms_stats TO omega;
+--------------------------------------------------
+sql>CREATE OR REPLACE PUBLIC SYNONYM dbms_stats FOR sys. dbms_stats;
+--------------------------------------------------
+
+rman> target / catalog omega/omega
+--------------------------------------------------
+rman>create catalog tablespace cattbs1;
+--------------------------------------------------
+
+rman>register database;
+--------------------------------------------------
+RMAN> show all;
+--------------------------------------------------
+/* Enable the backup optimization feature introduced in 9i to make sure that RMAN won't backup an archivelog or datafile if there already exists a backup of that file. The FORCE option can be used to override optimization on a specific BACKUP command. */
+RMAN> CONFIGURE BACKUP OPTIMIZATION ON; -- do not back up unchanged data files
+
+--------------------------------------------------
+RMAN> CONFIGURE MAXSETSIZE TO 2 G;      -- make filesize <= 2GB
+RMAN> CONFIGURE ENCRYPTION FOR DATABASE ON;               -- encrypt backups
+RMAN> CONFIGURE ENCRYPTION ALGORITHM 'AES256';            -- use 256 bit encryption
+RMAN> CONFIGURE ARCHIVELOG DELETION POLICY TO NONE;        # default
+--------------------------------------------------
+/* Configure the number of server processes (channels) that write backups to DISK. */
+RMAN> CONFIGURE DEVICE TYPE DISK PARALLELISM 2;
+--------------------------------------------------
+/* Set the retention policy to a recovery window of 30 days. This ensures that RMAN retains all backups needed to recover the database to any point in time in the last 30 days. You can use the DELETE OBSOLETE command to delete backups that are no longer required by the retention policy. To exclude a backup from consideration by the policy, you can use KEEP option with the BACKUP command. */
+RMAN> CONFIGURE RETENTION POLICY TO RECOVERY WINDOW OF 30 DAYS;
+--------------------------------------------------
+/* Enable automatic controlfile backup after each database or archivelog backup */
+RMAN> CONFIGURE CONTROLFILE AUTOBACKUP ON; 
+--------------------------------------------------
+RMAN> show all;
+-------------------------------------------------
+RMAN> report need backup;
+-------------------------------------------------
+RMAN> RUN
+      {
+        ALLOCATE CHANNEL d1 DEVICE TYPE DISK FORMAT 'c:\TEMP\%U'; 
+        ALLOCATE CHANNEL d2 DEVICE TYPE DISK FORMAT 'c:\TEMP\%U'; 
+        release channel d1;
+        # AS COPY is default when backing up to disk
+        # BACKUP DATABASE PLUS ARCHIVELOG;
+      }
+-------------------------------------------------
+list backup summary;

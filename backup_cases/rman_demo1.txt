@@ -1,0 +1,32 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+sql > shutdown immediate;
+SQL> startup mount exclusive;
+
+SQL> alter database archivelog;
+
+SQL> alter database open;
+
+SQL> alter system switch logfile;
+
+RUN {
+
+    # Set the default channel configuration
+    ALLOCATE CHANNEL dbkp1 DEVICE TYPE DISK 
+FORMAT 'c:\TEMP\ic_%d_%s_%t_%p';
+
+    # Back up specific datafiles and retain them as an image copies
+    #BACKUP AS COPY (DATAFILE 2, 6, 9 MAXSETSIZE 25M);
+
+    # Back up a specific tablespace and retain it as an image copy
+    #BACKUP AS COPY (TABLESPACE example MAXSETSIZE 15M);
+
+    # Back up the whole database and retain it as an image copy
+    BACKUP AS COPY DATABASE;
+}

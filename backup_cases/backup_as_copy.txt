@@ -1,0 +1,16 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+run{
+
+backup as copy
+datafile 1 format 'c:\backup\system01.dbf'
+datafile 2 format 'c:\backup\undotbs01.dbf'
+datafile 3 format 'c:\backup\sysaux01.dbf'
+datafile 4 format 'c:\backup\users01.dbf'
+datafile 5 format 'c:\backup\example01.dbf';}

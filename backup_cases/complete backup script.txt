@@ -1,0 +1,34 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+rman target sys/oracle@orcl
+
+sql> shutdown immediate;
+sql> startup mount;
+
+run { 
+	    allocate channel t1 type disk
+	    format 'c:\temp\backup.XX';
+	    BACKUP  database; 
+	    release channel t1; 
+	 }
+
+
+rman target sys/oracle@target
+
+sql> shutdown immediate;
+sql> startup mount;
+
+
+ run {
+	    allocate channel t1 type disk;
+	    restore DATABASE; 
+	    recover DATABASE; 
+	    release channel t1; 
+	 }
+

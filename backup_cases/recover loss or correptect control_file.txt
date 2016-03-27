@@ -1,0 +1,30 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+-- delete  any control file
+rman>backup database;
+
+sql> shutdwon immediate -- we catn't do this
+-- we do
+sql> shutdwon abort -- we can do this casue ther are no check point
+
+C:\>rman target sys/password@newh catalog hussen/password@catalog
+
+RMAN> set dbid 898038639;-- if have no catalog 
+
+executing command: SET DBID
+
+RMAN> run {
+ set controlfile autobackup format for device type disk to 'c:\backup\%F';
+ restore controlfile from autobackup;}
+
+RMAN> alter database mount;
+RMAN> restore database;
+RMAN> recover database;
+RMAN> alter database open resetlogs;
+

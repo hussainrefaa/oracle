@@ -1,0 +1,79 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+RUN
+      {
+        ALLOCATE CHANNEL d1 DEVICE TYPE DISK FORMAT 'c:\temp\%U'; 
+        ALLOCATE CHANNEL d2 DEVICE TYPE DISK FORMAT 'c:\temp\%U'; 
+        # AS COPY is default when backing up to disk
+        BACKUP DATABASE PLUS ARCHIVELOG;
+      }
+
+
+# restore
+RUN
+{
+  # uncomment the SET UNTIL command to restore database to the
+  # incremental backup taken three days ago.
+  # SET UNTIL TIME 'SYSDATE-3';
+  SET CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO
+  'c:\temp\ora_cf%F';
+  RESTORE CONTROLFILE FROM AUTOBACKUP;
+  ALTER DATABASE MOUNT;
+  RESTORE DATABASE CHECK READONLY;
+  RECOVER DATABASE NOREDO;
+  ALTER DATABASE OPEN RESETLOGS;
+}
+
+STARTUP MOUNT FORCE;
+RUN
+{
+SET UNTIL TIME "TO_DATE('2007-19-08:19:30:00','yyyy-dd-mm:hh24:mi:ss')";
+RESTORE DATABASE;
+RECOVER DATABASE;
+ALTER DATABASE OPEN RESETLOGS;
+
+# You must take a new whole database backup after resetlogs (as
+# in Section 2.1), since backups of previous incarnation are not easily
+# usable.
+}
+
+run {
+	    allocate channel t1 type disk;
+	    # set until time 'Aug 07 2000 :51';
+	    restore tablespace CATTBS1; 
+	    recover tablespace CATTBS1; 
+	    release channel t1; 
+	 }
+
+
+restore controlfile from 'c:\temp\cattbs1.DBF';
+
+
+
+----------
+incremental mode
+rman target sys/sys
+--------------------------
+RMAN> run {
+allocate channel c1 type disk format 'D:\Oracle\oradata\RMAN_BKP\df_%d_%s_%p_%t.bkp';
+backup incremental level=0 tag level_0 tablespace users;
+release channel c1;}
+---------------------------
+RMAN> run {
+allocate channel c1 type disk format 'D:\Oracle\oradata\RMAN_BKP\df_%d_%s_%p_%t.bkp';
+backup incremental level=1 tag level_1 tablespace USERS;
+release channel c1;}
+---------------------------
+RMAN>  run {
+allocate channel c1 type disk;
+restore tablespace USERS ;
+release channel c1;}
+---------------------------
+
+

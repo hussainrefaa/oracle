@@ -1,0 +1,31 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+Restoring and Recovering a Subset of the Database:
+
+STARTUP MOUNT;
+SQL 'ALTER TABLESPACE users OFFLINE IMMEDIATE';
+RESTORE TABLESPACE users;
+RECOVER TABLESPACE users;
+SQL 'ALTER TABLESPACE users ONLINE';
+
+
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+
+RUN
+{
+  SQL 'ALTER TABLESPACE users OFFLINE IMMEDIATE';
+  SQL 'ALTER TABLESPACE temp OFFLINE IMMEDIATE';
+  # restore the datafile to a new location
+  SET NEWNAME FOR DATAFILE 'C:\oracle\product\10.1.0\oradata\USERS01.DBF' TO 'C:\TEMP\USERS01.DBF';
+  SET NEWNAME FOR DATAFILE 'C:\oracle\product\10.1.0\oradata\TEMP01.DBF' TO 'C:\TEMP\TEMP01.DBF';
+  RESTORE TABLESPACE users, temp;
+  SWITCH DATAFILE ALL;   # point control file to new filenames
+  RECOVER TABLESPACE users, temp;
+}
+

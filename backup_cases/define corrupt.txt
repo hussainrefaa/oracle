@@ -1,0 +1,54 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+sql> shut immediate
+sql> exit
+-- use this tool for check hardware corrupt
+c:\> dbv file='c:\example.dbf'
+
+
+DBVERIFY - Verification complete
+
+Total Pages Examined         : 12795
+Total Pages Processed (Data) : 0
+Total Pages Failing   (Data) : 0
+Total Pages Processed (Index): 0
+Total Pages Failing   (Index): 0
+Total Pages Processed (Other): 0
+Total Pages Processed (Seg)  : 0
+Total Pages Failing   (Seg)  : 0
+Total Pages Empty            : 0
+Total Pages Marked Corrupt   : 12795
+Total Pages Influx           : 0
+Highest block SCN            : 0 (0.0)
+
+to repair problem do
+ rman>recover 'c:\example01.dbf' block=4,7
+
+---- use this fore check software corrupt
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue Mar 11 16:16:45 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+Connected to an idle instance.
+
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area  612368384 bytes
+Fixed Size                  1250428 bytes
+Variable Size             230689668 bytes
+Database Buffers          373293056 bytes
+Redo Buffers                7135232 bytes
+Database mounted.
+Database opened.
+SQL> analyze table hr.employees validate structure;
+
+Table analyzed.
+-- this mean there are no corrupt

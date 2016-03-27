@@ -1,0 +1,115 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+SQL> select 8 fom v$log;
+select 8 fom v$log
+             *
+ERROR at line 1:
+ORA-00923: FROM keyword not found where expected
+
+
+SQL> select * fom v$log;
+select * fom v$log
+         *
+ERROR at line 1:
+ORA-00923: FROM keyword not found where expected
+
+
+SQL> select * from v$log; -- to khnow the SEQUENCE number
+
+    GROUP#    THREAD#  SEQUENCE#      BYTES    MEMBERS ARC STATUS
+---------- ---------- ---------- ---------- ---------- --- ----------------
+FIRST_CHANGE# FIRST_TIM
+------------- ---------
+         1          1         17   52428800          2 NO  CURRENT
+       788277 04-MAR-08
+
+         2          1         15   52428800          2 YES INACTIVE
+       754946 04-MAR-08
+
+         3          1         16   52428800          2 YES INACTIVE
+       758559 04-MAR-08
+
+
+SQL> select * from v$logfile;
+
+    GROUP# STATUS  TYPE
+---------- ------- -------
+MEMBER
+--------------------------------------------------------------------------------
+
+IS_
+---
+         3 STALE   ONLINE
+D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\REDO03.LOG
+NO
+
+         2         ONLINE
+D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\REDO02.LOG
+NO
+
+    GROUP# STATUS  TYPE
+---------- ------- -------
+MEMBER
+--------------------------------------------------------------------------------
+
+IS_
+---
+
+         1         ONLINE
+D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\REDO01.LOG
+NO
+
+         1         ONLINE
+D:\REDO01.LOG
+
+    GROUP# STATUS  TYPE
+---------- ------- -------
+MEMBER
+--------------------------------------------------------------------------------
+
+IS_
+---
+NO
+
+         2 INVALID ONLINE
+D:\REDO02.LOG
+NO
+
+         3 STALE   ONLINE
+
+    GROUP# STATUS  TYPE
+---------- ------- -------
+MEMBER
+--------------------------------------------------------------------------------
+
+IS_
+---
+D:\REDO03.LOG
+NO
+
+
+6 rows selected.
+sql> shutdown immediate;
+---------
+from the opreting system :
+delete the current log file from 
+the oraclehome\oradata\newh\
+
+sql>startup mount;
+rman>
+ run
+ {
+ set until sequence= 17 thread =1;
+ restore database;
+ recover database;
+ sql 'alter database open resetlogs';
+ }
+
+
+RMAN> list incarnation of database;

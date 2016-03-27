@@ -1,0 +1,66 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+rman target sys/oracle 
+rman> CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+rman> CONFIGURE RETENTION POLICY TO REDUNDANCY 5;
+rman> CONFIGURE DEVICE TYPE DISK PARALLELISM 2;
+rman> CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT 'c:\temp\ora_df%t_s%s_s%p';
+rman> CONFIGURE CONTROLFILE AUTOBACKUP ON;
+rman> CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO 'c:\temp\ora_cf%F';
+----------------------------------------------------
+sql > shutdown immediate;
+sql > startup mount;
+sql > alter database archivelog;
+sql > alter database open;
+RMAN> 
+run {
+   backup database plus archivelog; 
+   delete noprompt obsolete;
+ }
+----------------------------------------------------
+
+then create new database using Database Configuration Assistant
+i use the default setting
+the hostname = target
+----------------------------------------------------
+--- restore database
+-- create new database to as target database
+conn sys/oracle@target as sysdba;
+-- get dbid
+sql> select dbid from v$database;
+3036509744
+----------------------------------------------------
+rman target sys/oracle
+rman> shutdown immediate;
+rman> STARTUP NOMOUNT;
+rman> SET DBID = target_dbid;
+rman> set DBID 2659112737;
+
+RUN
+{
+  
+  SET CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO
+  'c:\temp\ora_cf%F';
+  RESTORE CONTROLFILE FROM AUTOBACKUP;
+  ALTER DATABASE MOUNT;
+  RESTORE DATABASE CHECK READONLY;
+  RECOVER DATABASE NOREDO;
+  ALTER DATABASE OPEN RESETLOGS;
+}
+##############################################
+## RMAN-00571: ===========================================================
+## RMAN-00569: =============== ERROR MESSAGE STACK FOLLOWS ===============
+## RMAN-00571: ===========================================================
+## RMAN-03002: failure of restore command at 09/16/2007 18:22:55
+## RMAN-06026: some targets not found - aborting restore
+## RMAN-06023: no backup or copy of datafile 4 found to restore
+## RMAN-06023: no backup or copy of datafile 3 found to restore
+## RMAN-06023: no backup or copy of datafile 2 found to restore
+## RMAN-06023: no backup or copy of datafile 1 found to restore
+##############################################

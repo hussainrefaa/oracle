@@ -1,0 +1,120 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+C:\>rman target sys/password@newh catalog hussen/password@catalog
+
+Recovery Manager: Release 10.2.0.1.0 - Production on Tue Feb 26 14:21:23 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+connected to target database: NEWH (DBID=1439038048)
+connected to recovery catalog database
+
+RMAN> exit
+
+
+Recovery Manager complete.
+
+C:\>rman target sys/password@newh catalog hussen/password@catalog cmdfile='d:\ba
+ckup_case\cop.txt'
+
+Argument     Value          Description
+-----------------------------------------------------------------------------
+target       quoted-string  connect-string for target database
+catalog      quoted-string  connect-string for recovery catalog
+nocatalog    none           if specified, then no recovery catalog
+cmdfile      quoted-string  name of input command file
+log          quoted-string  name of output message log file
+trace        quoted-string  name of output debugging message log file
+append       none           if specified, log is opened in append mode
+debug        optional-args  activate debugging
+msgno        none           show RMAN-nnnn prefix for all messages
+send         quoted-string  send a command to the media manager
+pipe         string         building block for pipe names
+timeout      integer        number of seconds to wait for pipe input
+checksyntax  none           check the command file for syntax errors
+-----------------------------------------------------------------------------
+Both single and double quotes (' or ") are accepted for a quoted-string.
+Quotes are not required unless the string contains embedded white-space.
+
+RMAN-00571: ===========================================================
+RMAN-00569: =============== ERROR MESSAGE STACK FOLLOWS ===============
+RMAN-00571: ===========================================================
+RMAN-00556: could not open CMDFILE "d:\backup_case\cop.txt"
+
+C:\>rman target sys/password@newh catalog hussen/password@catalog cmdfile='d:\ba
+ckup_case\copy.txt'
+
+Recovery Manager: Release 10.2.0.1.0 - Production on Tue Feb 26 14:23:41 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+connected to target database: NEWH (DBID=1439038048)
+connected to recovery catalog database
+
+RMAN> run{
+2>
+3> backup as copy
+4> datafile 1 format 'c:\backup\system01.dbf'
+5> datafile 2 format 'c:\backup\undotbs01.dbf'
+6> datafile 3 format 'c:\backup\sysaux01.dbf'
+7> datafile 4 format 'c:\backup\users01.dbf'
+8> datafile 5 format 'c:\backup\example01.dbf';}
+9>
+Starting backup at 26-FEB-08
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: sid=154 devtype=DISK
+channel ORA_DISK_1: starting datafile copy
+input datafile fno=00001 name=D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\SYSTEM01.DBF
+
+output filename=C:\BACKUP\SYSTEM01.DBF tag=TAG20080226T142349 recid=2 stamp=6477
+06251
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:26
+channel ORA_DISK_1: starting datafile copy
+input datafile fno=00003 name=D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\SYSAUX01.DBF
+
+output filename=C:\BACKUP\SYSAUX01.DBF tag=TAG20080226T142349 recid=3 stamp=6477
+06266
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:15
+channel ORA_DISK_1: starting datafile copy
+input datafile fno=00005 name=D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\EXAMPLE01.DB
+F
+output filename=C:\BACKUP\EXAMPLE01.DBF tag=TAG20080226T142349 recid=4 stamp=647
+706275
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:07
+channel ORA_DISK_1: starting datafile copy
+input datafile fno=00002 name=D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\UNDOTBS01.DB
+F
+output filename=C:\BACKUP\UNDOTBS01.DBF tag=TAG20080226T142349 recid=5 stamp=647
+706279
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:03
+channel ORA_DISK_1: starting datafile copy
+input datafile fno=00004 name=D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\USERS01.DBF
+output filename=C:\BACKUP\USERS01.DBF tag=TAG20080226T142349 recid=6 stamp=64770
+6281
+channel ORA_DISK_1: datafile copy complete, elapsed time: 00:00:01
+Finished backup at 26-FEB-08
+
+Starting Control File and SPFILE Autobackup at 26-FEB-08
+RMAN-00571: ===========================================================
+RMAN-00569: =============== ERROR MESSAGE STACK FOLLOWS ===============
+RMAN-00571: ===========================================================
+RMAN-03009: failure of Control File and SPFILE Autobackup command on ORA_DISK_1
+channel at 02/26/2008 14:24:44
+ORA-01580: error creating control backup file E:\ORACLE\PRODUCT\10.2.0\DB_1\DATA
+BASE\SNCFNEWH.ORA
+ORA-27040: file create error, unable to create file
+OSD-04002: unable to open file
+O/S-Error: (OS 1005) The volume does not contain a recognized file system. Pleas
+e make sure that all required file system drivers are loaded and that the volume
+ is not corrupted.
+
+Recovery Manager complete.
+
+C:\>
+sqlplus> alter database enable block change tracking using file 'c:\track.txt';

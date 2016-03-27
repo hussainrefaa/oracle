@@ -1,0 +1,27 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+-- in this case yuo dont need to shutdown database
+-- only make the correpted file offline
+-- then restor and recover using rman
+-- like example01
+-- this tablespace content hr,scott.. data
+--
+-- make the file offline 
+sql> alter database datafile 5 offline;
+
+c:\ rman target sys/password@newh catalog hussen/password@catalog
+
+rman>
+run
+{
+restore datafile 5;
+recover datafile 5;
+}
+
+rman> sql 'alter database datafile 5 online';

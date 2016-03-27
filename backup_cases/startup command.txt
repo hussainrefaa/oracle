@@ -1,0 +1,15 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+SQL> startup nomount;
+SQL> startup mount exclusive;
+SQL> alter database open;
+sql> startup force mount pfile='/u01/app/oracle/product/10.1.0/db_1/dbs/spfiletesting.ora'
+SQL> startup pfile=/u01/app/oracle/product/10.1.0/db_1/dbs/spfiletesting.ora
+SQL> alter database open resetlogs;
+SQL> alter database archivelog;

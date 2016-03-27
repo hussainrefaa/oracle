@@ -1,0 +1,344 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+SQL> desc v$database
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+
+ DBID                                               NUMBER
+ NAME                                               VARCHAR2(9)
+ CREATED                                            DATE
+ RESETLOGS_CHANGE#                                  NUMBER
+ RESETLOGS_TIME                                     DATE
+ PRIOR_RESETLOGS_CHANGE#                            NUMBER
+ PRIOR_RESETLOGS_TIME                               DATE
+ LOG_MODE                                           VARCHAR2(12)
+ CHECKPOINT_CHANGE#                                 NUMBER
+ ARCHIVE_CHANGE#                                    NUMBER
+ CONTROLFILE_TYPE                                   VARCHAR2(7)
+ CONTROLFILE_CREATED                                DATE
+ CONTROLFILE_SEQUENCE#                              NUMBER
+ CONTROLFILE_CHANGE#                                NUMBER
+ CONTROLFILE_TIME                                   DATE
+ OPEN_RESETLOGS                                     VARCHAR2(11)
+ VERSION_TIME                                       DATE
+ OPEN_MODE                                          VARCHAR2(10)
+ PROTECTION_MODE                                    VARCHAR2(20)
+ PROTECTION_LEVEL                                   VARCHAR2(20)
+ REMOTE_ARCHIVE                                     VARCHAR2(8)
+ ACTIVATION#                                        NUMBER
+ SWITCHOVER#                                        NUMBER
+ DATABASE_ROLE                                      VARCHAR2(16)
+ ARCHIVELOG_CHANGE#                                 NUMBER
+ ARCHIVELOG_COMPRESSION                             VARCHAR2(8)
+ SWITCHOVER_STATUS                                  VARCHAR2(20)
+ DATAGUARD_BROKER                                   VARCHAR2(8)
+ GUARD_STATUS                                       VARCHAR2(7)
+ SUPPLEMENTAL_LOG_DATA_MIN                          VARCHAR2(8)
+ SUPPLEMENTAL_LOG_DATA_PK                           VARCHAR2(3)
+ SUPPLEMENTAL_LOG_DATA_UI                           VARCHAR2(3)
+ FORCE_LOGGING                                      VARCHAR2(3)
+ PLATFORM_ID                                        NUMBER
+ PLATFORM_NAME                                      VARCHAR2(101)
+ RECOVERY_TARGET_INCARNATION#                       NUMBER
+ LAST_OPEN_INCARNATION#                             NUMBER
+ CURRENT_SCN                                        NUMBER
+ FLASHBACK_ON                                       VARCHAR2(3)
+ SUPPLEMENTAL_LOG_DATA_FK                           VARCHAR2(3)
+ SUPPLEMENTAL_LOG_DATA_ALL                          VARCHAR2(3)
+ DB_UNIQUE_NAME                                     VARCHAR2(30)
+ STANDBY_BECAME_PRIMARY_SCN                         NUMBER
+
+SQL> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+SQL> startup nomount;
+ORACLE instance started.
+
+Total System Global Area  171966464 bytes
+Fixed Size                   787988 bytes
+Variable Size             145488364 bytes
+Database Buffers           25165824 bytes
+Redo Buffers                 524288 bytes
+
+
+SQL> alter database mount;
+
+Database altered.
+
+SQL> alter database archivelog;
+
+Database altered.
+
+SQL> alter database open;
+
+Database altered.
+
+SQL> exit
+Disconnected from Oracle Database 10g Enterprise Edition Release 10.1.0.2.0 - Pr
+oduction
+With the Partitioning, OLAP and Data Mining options
+
+
+
+C:\Documents and Settings\hrefaha.MOCT>rman nocatalog  target /
+
+Recovery Manager: Release 10.1.0.2.0 - Production
+
+Copyright (c) 1995, 2004, Oracle.  All rights reserved.
+
+connected to target database: ORCL (DBID=1160623376)
+using target database controlfile instead of recovery catalog
+
+RMAN> report need backup;
+
+RMAN retention policy will be applied to the command
+RMAN retention policy is set to redundancy 1
+Report of files with less than 1 redundant backups
+File #bkps Name
+---- ----- -----------------------------------------------------
+1    0     D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSTEM01.DBF
+2    0     D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\UNDOTBS01.DBF
+3    0     D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSAUX01.DBF
+4    0     D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\USERS01.DBF
+5    0     D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\EXAMPLE01.DBF
+6    0     D:\DB\MAINTENACE\DATA\DATA.DAT
+7    0     D:\DB\MAINTENACE\INDEX\INDEX.DAT
+8    0     D:\DB\MAINTENACE\UBDO\TEMP_UNDO.DAT
+
+
+
+RMAN> run
+2> {
+3> allocate channel c1 type disk format 'd:\d%s%full.bk';
+4> backup database tag='Full';
+5> }
+
+allocated channel: c1
+channel c1: sid=148 devtype=DISK
+
+Starting backup at 15/11/07
+channel c1: starting full datafile backupset
+channel c1: specifying datafile(s) in backupset
+input datafile fno=00001 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSTEM01.DBF
+
+input datafile fno=00004 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\USERS01.DBF
+input datafile fno=00003 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSAUX01.DBF
+
+input datafile fno=00002 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\UNDOTBS01.DB
+F
+input datafile fno=00005 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\EXAMPLE01.DB
+F
+input datafile fno=00006 name=D:\DB\MAINTENACE\DATA\DATA.DAT
+input datafile fno=00007 name=D:\DB\MAINTENACE\INDEX\INDEX.DAT
+input datafile fno=00008 name=D:\DB\MAINTENACE\UBDO\TEMP_UNDO.DAT
+channel c1: starting piece 1 at 15/11/07
+channel c1: finished piece 1 at 15/11/07
+piece handle=D:\D38ULL.BK comment=NONE
+channel c1: backup set complete, elapsed time: 00:02:06
+channel c1: starting full datafile backupset
+channel c1: specifying datafile(s) in backupset
+including current controlfile in backupset
+including current SPFILE in backupset
+channel c1: starting piece 1 at 15/11/07
+channel c1: finished piece 1 at 15/11/07
+piece handle=D:\D40ULL.BK comment=NONE
+channel c1: backup set complete, elapsed time: 00:00:02
+Finished backup at 15/11/07
+released channel: c1
+
+
+
+
+RMAN> exit
+
+
+RMAN> list
+2> backup;
+
+using target database controlfile instead of recovery catalog
+
+List of Backup Sets
+===================
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+1       Full    1G         DISK        00:02:31     15/11/07
+        BP Key: 1   Status: AVAILABLE  Compressed: NO  Tag: FULL
+        Piece Name: C:\WINDOWS\SYSTEM32\D18ULL.BK
+  List of Datafiles in backup set 1
+  File LV Type Ckp SCN    Ckp Time Name
+  ---- -- ---- ---------- -------- ----
+  1       Full 2671232    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSTEM0
+1.DBF
+  2       Full 2671232    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\UNDOTBS
+01.DBF
+  3       Full 2671232    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSAUX0
+1.DBF
+  4       Full 2671232    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\USERS01
+.DBF
+  5       Full 2671232    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\EXAMPLE
+01.DBF
+  6       Full 2671232    15/11/07 D:\DB\MAINTENACE\DATA\DATA.DAT
+  7       Full 2671232    15/11/07 D:\DB\MAINTENACE\INDEX\INDEX.DAT
+  8       Full 2671232    15/11/07 D:\DB\MAINTENACE\UBDO\TEMP_UNDO.DAT
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+2       Full    2M         DISK        00:00:03     15/11/07
+        BP Key: 2   Status: AVAILABLE  Compressed: NO  Tag: FULL
+        Piece Name: C:\WINDOWS\SYSTEM32\D20ULL.BK
+  Controlfile Included: Ckp SCN: 2671334      Ckp time: 15/11/07
+  SPFILE Included: Modification time: 29/10/07
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+3       Full    1G         DISK        00:01:57     15/11/07
+        BP Key: 3   Status: AVAILABLE  Compressed: NO  Tag: FULL
+        Piece Name: D:\D38ULL.BK
+  List of Datafiles in backup set 3
+  File LV Type Ckp SCN    Ckp Time Name
+  ---- -- ---- ---------- -------- ----
+  1       Full 2671443    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSTEM0
+1.DBF
+  2       Full 2671443    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\UNDOTBS
+01.DBF
+  3       Full 2671443    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\SYSAUX0
+1.DBF
+  4       Full 2671443    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\USERS01
+.DBF
+  5       Full 2671443    15/11/07 D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\EXAMPLE
+01.DBF
+  6       Full 2671443    15/11/07 D:\DB\MAINTENACE\DATA\DATA.DAT
+  7       Full 2671443    15/11/07 D:\DB\MAINTENACE\INDEX\INDEX.DAT
+  8       Full 2671443    15/11/07 D:\DB\MAINTENACE\UBDO\TEMP_UNDO.DAT
+
+BS Key  Type LV Size       Device Type Elapsed Time Completion Time
+------- ---- -- ---------- ----------- ------------ ---------------
+4       Full    2M         DISK        00:00:02     15/11/07
+        BP Key: 4   Status: AVAILABLE  Compressed: NO  Tag: FULL
+        Piece Name: D:\D40ULL.BK
+  Controlfile Included: Ckp SCN: 2671496      Ckp time: 15/11/07
+  SPFILE Included: Modification time: 29/10/07
+
+
+
+------------------------------------
+------------------------------------
+------------------------------------
+script for restore
+------------------------------------
+------------------------------------
+------------------------------------
+------------------------------------
+
+Microsoft Windows XP [Version 5.1.2600]
+(C) Copyright 1985-2001 Microsoft Corp.
+
+C:\Documents and Settings\hrefaha.MOCT>sqlplus
+
+SQL*Plus: Release 10.1.0.2.0 - Production on ?Ø?Úæ? Ûµ?Ú?? 15 10:32:57 2007
+
+Copyright (c) 1982, 2004, Oracle.  All rights reserved.
+
+Enter user-name: sys/sys as sysdba
+
+Connected to:
+Oracle Database 10g Enterprise Edition Release 10.1.0.2.0 - Production
+With the Partitioning, OLAP and Data Mining options
+
+SQL> shutdown immediate;
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+--- HERE CLEAR OR DELTE ANY FILE FROM oracle\product\10.1.0\oradata\orcl THEN STARTUP
+SQL> startup;
+ORACLE instance started.
+
+Total System Global Area  171966464 bytes
+Fixed Size                   787988 bytes
+Variable Size             145488364 bytes
+Database Buffers           25165824 bytes
+Redo Buffers                 524288 bytes
+Database mounted.
+ORA-01157: cannot identify/lock data file 4 - see DBWR trace file
+ORA-01110: data file 4: 'D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\USERS01.DBF'
+
+
+SQL> select status from v$instance;
+
+STATUS
+------------
+MOUNTED
+
+
+
+SQL> alter database open resetlog;
+alter database open resetlog
+                    *
+ERROR at line 1:
+ORA-02288: invalid OPEN mode
+
+
+SQL> alter database open;
+alter database open
+*
+ERROR at line 1:
+ORA-01113: file 4 needs media recovery
+ORA-01110: data file 4: 'D:\ORACLE\PRODUCT\10.1.0\ORADATA\ORCL\USERS01.DBF'
+
+sql> exit;
+---------------------------------------------------------------------------
+rman target / 
+
+run {
+set newname for datafile 4 to 'oradata/sys01.dbf';
+set newname for datafile 2 to ..............................
+}
+rman> restore datafile 4;
+
+rman> exit;
+
+sqlplus sys/oracle as sysdba;
+
+SQL> recover database;
+Media recovery complete.
+SQL> select * from scott.dept;
+select * from scott.dept
+                    *
+ERROR at line 1:
+ORA-01219: database not open: queries allowed on fixed tables/views only
+
+
+SQL> alter database open;
+
+Database altered.
+
+SQL> select * from scott.dept;
+
+    DEPTNO DNAME          LOC
+---------- -------------- -------------
+        10 ACCOUNTING     NEW YORK
+        20 RESEARCH       DALLAS
+        30 SALES          CHICAGO
+        40 OPERATIONS     BOSTON
+
+SQL> conn olap/olap
+ERROR:
+ORA-01017: invalid username/password; logon denied
+
+
+Warning: You are no longer connected to ORACLE.
+SQL> conn gsw/gsw
+Connected.
+SQL> conn mof/mof
+Connected.
+SQL>
+

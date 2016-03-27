@@ -1,0 +1,118 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+CONNECT sys/oracle  AS SYSDBA
+drop TABLESPACE "RMAN" INCLUDING CONTENTS;
+drop user rman cascade;
+------------------------------
+CREATE TABLESPACE "RMAN" 
+DATAFILE 'C:\temp\RMAN01.DBF' SIZE 6208K REUSE
+AUTOEXTEND ON NEXT 64K MAXSIZE 32767M
+EXTENT MANAGEMENT LOCAL
+SEGMENT SPACE MANAGEMENT AUTO;
+------------------------------
+CREATE USER rman IDENTIFIED BY rman
+TEMPORARY TABLESPACE temp 
+DEFAULT TABLESPACE rman 
+QUOTA UNLIMITED ON rman;
+------------------------------
+GRANT connect, resource, recovery_catalog_owner TO rman;
+------------------------------
+rman catalog=rman/rman@orcl
+------------------------------
+create catalog tablespace "RMAN";
+------------------------------
+exit
+------------------------------
+rman catalog=rman/rman@orcl target=sys/oracle@orcl
+------------------------------
+register database;
+------------------------------
+Existing user-created backups can be added to the catalog using:
+
+    RMAN> catalog datafilecopy 'C:\Oracle\Oradata\TSH1.dbf';
+    RMAN> catalog archivelog 'log1', 'log2', 'log3', ... 'logN';
+------------------------------
+RMAN> configure retention policy to recovery window of 2 days;
+RMAN> configure default device type to disk;
+RMAN> configure controlfile autobackup on;
+RMAN> configure channel device type disk format 'C:\temp\Backup%d_DB_%u_%s_%p';
+------------------------------
+sql > shutdown immediate;
+sql > startup mount;
+sql > alter database archivelog;
+sql > alter database open;
+RMAN> 
+run {
+   backup database plus archivelog; 
+   delete noprompt obsolete;
+ }
+------------------------------
+RMAN> resync catalog;
+------------------------------
+run 
+{
+     shutdown immediate; # use abort if this fails
+     startup mount;
+     restore database;
+     recover database;
+     ALTER DATABASE OPEN RESETLOGS;
+     alter database open;
+}
+
+BACKUP tablespace users TIME BETWEEN  'SYSDATE-1' AND 'SYSDATE'; 
+
+#### another case
+run 
+{
+  #sql 'ALTER TABLESPACE users OFFLINE IMMEDIATE';
+  #SET UNTIL TIME "TO_DATE('2007-08-09:17:23:00','yyyy-dd-mm:hh24:mi:ss')";
+  restore tablespace users;
+  #recover tablespace users;
+  RECOVER TABLESPACE users;
+  sql 'ALTER TABLESPACE users ONLINE'; 
+}
+
+ALTER DATABASE OPEN RESETLOGS;
+
+RECOVER TABLESPACE users UNTIL SEQUENCE 1300 THREAD 1;
+
+run
+{
+   sql "ALTER TABLESPACE RMAN OFFLINE IMMEDIATE";
+    RESTORE TABLESPACE "RMAN";
+    RECOVER TABLESPACE "RMAN" DELETE ARCHIVELOG;
+    sql "ALTER TABLESPACE RMAN ONLINE";
+}
+
+select dbid from v$database;
+shutdown immediate;
+STARTUP NOMOUNT;
+SET DBID = target_dbid;
+set DBID 3034992978;
+RMAN>
+ RUN
+{
+  #  If you need to restore the files to new locations, tell Recovery Manager
+  #  to do this using SET NEWNAME commands:
+  SET NEWNAME FOR DATAFILE 1 TO 'C:\temp\Backup%d_DB_%u_%s_%p';
+  SET NEWNAME FOR DATAFILE 2 TO 'C:\temp\Backup%d_DB_%u_%s_%p';
+  SET NEWNAME FOR DATAFILE 3 TO 'C:\temp\Backup%d_DB_%u_%s_%p';
+  ALLOCATE CHANNEL t1 DEVICE TYPE sbt;
+  RESTORE CONTROLFILE FROM AUTOBACKUP;
+  ALTER DATABASE MOUNT;
+  SET UNTIL SEQUENCE 124 THREAD 1;
+  RESTORE DATABASE;
+  SWITCH DATAFILE ALL; # Update control file with new location of datafiles.
+  RECOVER DATABASE;
+}
+
+configure controlfile autobackup on;
+------------------------------------
+SQL> STARTUP MOUNT EXCLUSIVE;
+sql> ALTER DATABASE FLASHBACK ON;

@@ -1,0 +1,60 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue Mar 11 14:42:22 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Enterprise Edition Release 10.2.0.1.0 - Production
+With the Partitioning, OLAP and Data Mining options
+
+
+
+
+SQL> create table scott.emp10 as select * from hr.employees;
+
+Table created.
+
+SQL> alter table scott.dept enable row movement;
+
+Table altered.
+
+SQL> alter table scott.emp10 enable row movement;
+
+Table altered.
+
+
+SQL> update scott.emp10 set salary=salary*1.1 where
+  2  department_id=10;
+
+1 row updated.
+
+SQL> delete from scott.emp10 where department_id=20;
+
+2 rows deleted.
+
+SQL> commit;
+
+Commit complete.
+
+sql > select versions_startscn, 
+      to_char(versions_starttime, 'YYYY-MM-DD HH24:MI:SS'),
+      versions_xid, versions_operation, EMPLOYEE_ID, LAST_NAME, 
+      FIRST_NAME, SALARY from SCOTT.EMP10 versions
+      between scn minvalue and maxvalue 
+      where versions_startscn is not null order by 
+      versions_startscn desc
+
+SQL> flashbacktable scott.emp10 to scn 10865978;
+
+
+sql> select * from scott.emp10 
+     where department_id = 40;
+

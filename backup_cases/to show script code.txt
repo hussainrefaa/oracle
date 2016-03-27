@@ -1,0 +1,76 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+C:\>sqlplus hussen/password@catalog;
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sun Mar 2 15:11:10 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+ERROR:
+ORA-12154: TNS:could not resolve the connect identifier specified
+
+
+Enter user-name:
+ERROR:
+ORA-01017: invalid username/password; logon denied
+
+
+Enter user-name:
+C:\>sqlplus hussen/password@catalog
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Sun Mar 2 15:13:05 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+
+Connected to:
+Oracle Database 10g Enterprise Edition Release 10.2.0.1.0 - Production
+With the Partitioning, OLAP and Data Mining options
+
+SQL> desc rc_stored_script
+ Name                                      Null?    Type
+ ----------------------------------------- -------- ----------------------------
+
+ DB_KEY                                             NUMBER
+ DB_NAME                                            VARCHAR2(8)
+ SCRIPT_NAME                               NOT NULL VARCHAR2(100)
+ SCRIPT_COMMENT                                     VARCHAR2(255)
+
+SQL> select * from rc_stored_script
+  2  /
+
+    DB_KEY DB_NAME
+---------- --------
+SCRIPT_NAME
+--------------------------------------------------------------------------------
+
+SCRIPT_COMMENT
+--------------------------------------------------------------------------------
+
+         1 NEWH
+level0backup
+
+
+         1 NEWH
+level1backup
+
+
+    DB_KEY DB_NAME
+---------- --------
+SCRIPT_NAME
+--------------------------------------------------------------------------------
+
+SCRIPT_COMMENT
+--------------------------------------------------------------------------------
+
+
+select from rc_stored_script_line
+where lower(script_name> like '%level0%';
+
+SQL>

@@ -1,0 +1,32 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+-- in this case we can't restore file to 
+-- the same partation becuse the media is failar
+-- 
+SQL> select * from v$recover_file
+
+SQL> select file#,name from v$datafile;
+
+sql> alter database datafile 4 offline;
+sql> alter database datafile 5 offline;
+
+c:\    rman target sys/password@newh catalog hussen/password@catalog
+or c:\ rman target / nocatalog
+rman>run
+{
+ restore datafile 4;
+ recover datafile 4;
+ restore datafile 5;
+ recover datafile 5;
+}
+
+
+
+sql>alter database datafile 4 online;
+sql>alter database datafile 5 online;

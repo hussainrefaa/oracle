@@ -1,0 +1,31 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+SQL> select name from v$tempfile;
+
+NAME
+-------------------------------------------------
+
+D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\TEMP01.DBF
+
+SQL> shutdown immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+
+-- delete the temp file
+-- in the 10.2.1.2 will recreate the file
+-- in later version or if the file is correpted
+create temporary tablespace temp2 tempfile 'c:\temp' size 20m;
+
+-- make it as default
+alter database default temporary tablespace temp2;
+
+then
+
+drop tablespace temp including contents and datafiles;

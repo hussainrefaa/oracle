@@ -1,0 +1,312 @@
+Microsoft Windows XP [Version 5.1.2600]
+(C) Copyright 1985-2001 Microsoft Corp.
+
+C:\Documents and Settings\hrefaha.MOCT>RMAN TARGET / NOCATALOG
+
+Recovery Manager: Release 10.1.0.2.0 - Production
+
+Copyright (c) 1995, 2004, Oracle.  All rights reserved.
+
+connected to target database: JOB (DBID=2884833705)
+using target database controlfile instead of recovery catalog
+
+####### THIS IS THE FULL SCRIPT TO BACKUP
+rman target / nocatalog <<-EOF
+  shutdown immediate;
+  startup force dba;
+  shutdown immediate;
+  startup mount;
+  CONFIGURE CONTROLFILE AUTOBACKUP ON;
+  CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO '/u01/backup/rman_backup_controlfile_%F';
+  CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+  CONFIGURE DEVICE TYPE DISK PARALLELISM 2;
+  CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT '/u01/backup/rman_backup_database_%U';
+  CONFIGURE MAXSETSIZE TO 10000M;
+  SHOW ALL;
+  BACKUP DATABASE INCLUDE CURRENT CONTROLFILE TAG 'before_upgrade';
+alter database open;
+EOF
+exit
+######
+
+
+RMAN> SHUTDOWN IMMEDIATE
+
+database closed
+database dismounted
+Oracle instance shut down
+
+RMAN> STARTUP FORCE DBA
+
+Oracle instance started
+database mounted
+database opened
+
+Total System Global Area     171966464 bytes
+
+Fixed Size                      787988 bytes
+Variable Size                145488364 bytes
+Database Buffers              25165824 bytes
+Redo Buffers                    524288 bytes
+
+RMAN> SHUTDOWN IMMEDIATE
+
+database closed
+database dismounted
+Oracle instance shut down
+
+RMAN> STARTUP MOUNT
+
+connected to target database (not started)
+Oracle instance started
+database mounted
+
+Total System Global Area     171966464 bytes
+
+Fixed Size                      787988 bytes
+Variable Size                145488364 bytes
+Database Buffers              25165824 bytes
+Redo Buffers                    524288 bytes
+
+RMAN>
+
+RMAN> CONFIGURE CONTROLFILE AUTOBACKUP ON;
+
+new RMAN configuration parameters:
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+new RMAN configuration parameters are successfully stored
+
+RMAN> CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO 'C:\TEMP\r
+man_backup_controlfile_%F';
+
+new RMAN configuration parameters:
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO 'C:\TEMP\rman_ba
+ckup_controlfile_%F';
+new RMAN configuration parameters are successfully stored
+
+RMAN> CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+
+new RMAN configuration parameters:
+CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+new RMAN configuration parameters are successfully stored
+
+RMAN> CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT 'C:\TEMP\rman_backup_database_%U
+';
+
+new RMAN configuration parameters:
+CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT   'C:\TEMP\rman_backup_database_%U';
+new RMAN configuration parameters are successfully stored
+
+RMAN>   CONFIGURE MAXSETSIZE TO 10000M;
+
+new RMAN configuration parameters:
+CONFIGURE MAXSETSIZE TO 10000 M;
+new RMAN configuration parameters are successfully stored
+
+RMAN> SHOW ALL;
+
+RMAN configuration parameters are:
+CONFIGURE RETENTION POLICY TO REDUNDANCY 1; # default
+CONFIGURE BACKUP OPTIMIZATION OFF; # default
+CONFIGURE DEFAULT DEVICE TYPE TO DISK;
+CONFIGURE CONTROLFILE AUTOBACKUP ON;
+CONFIGURE CONTROLFILE AUTOBACKUP FORMAT FOR DEVICE TYPE DISK TO 'C:\TEMP\rman_ba
+ckup_controlfile_%F';
+CONFIGURE DEVICE TYPE DISK PARALLELISM 1 BACKUP TYPE TO BACKUPSET; # default
+CONFIGURE DATAFILE BACKUP COPIES FOR DEVICE TYPE DISK TO 1; # default
+CONFIGURE ARCHIVELOG BACKUP COPIES FOR DEVICE TYPE DISK TO 1; # default
+CONFIGURE CHANNEL DEVICE TYPE DISK FORMAT   'C:\TEMP\rman_backup_database_%U';
+CONFIGURE MAXSETSIZE TO 10000 M;
+CONFIGURE ARCHIVELOG DELETION POLICY TO NONE; # default
+CONFIGURE SNAPSHOT CONTROLFILE NAME TO 'D:\ORACLE\PRODUCT\10.1.0\DB_2\DATABASE\S
+NCFJOB.ORA'; # default
+
+RMAN> BACKUP DATABASE INCLUDE CURRENT CONTROLFILE TAG 'before_upgrade';
+
+Starting backup at 04/03/08
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: sid=160 devtype=DISK
+channel ORA_DISK_1: starting full datafile backupset
+channel ORA_DISK_1: specifying datafile(s) in backupset
+input datafile fno=00001 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\SYSTEM01.DBF
+input datafile fno=00003 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\SYSAUX01.DBF
+input datafile fno=00002 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\UNDOTBS01.DBF
+
+input datafile fno=00007 name=D:\HYPERMARKETS\JOB_IDX1.ORA
+input datafile fno=00008 name=D:\HYPERMARKETS\JOB_IDX2.ORA
+input datafile fno=00009 name=D:\HYPERMARKETS\JOB_IDX3.ORA
+input datafile fno=00010 name=D:\HYPERMARKETS\JOB_IDX4.ORA
+input datafile fno=00011 name=D:\HYPERMARKETS\JOB_IDX5.ORA
+input datafile fno=00005 name=D:\HYPERMARKETS\JOB_USER.ORA
+input datafile fno=00006 name=D:\HYPERMARKETS\JOB_MATERIAL_DATA1
+input datafile fno=00004 name=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\USERS01.DBF
+channel ORA_DISK_1: starting piece 1 at 04/03/08
+channel ORA_DISK_1: finished piece 1 at 04/03/08
+piece handle=C:\TEMP\RMAN_BACKUP_DATABASE_01JADIK4_1_1 comment=NONE
+channel ORA_DISK_1: backup set complete, elapsed time: 00:01:19
+channel ORA_DISK_1: starting full datafile backupset
+channel ORA_DISK_1: specifying datafile(s) in backupset
+including current controlfile in backupset
+channel ORA_DISK_1: starting piece 1 at 04/03/08
+channel ORA_DISK_1: finished piece 1 at 04/03/08
+piece handle=C:\TEMP\RMAN_BACKUP_DATABASE_02JADIMJ_1_1 comment=NONE
+channel ORA_DISK_1: backup set complete, elapsed time: 00:00:04
+Finished backup at 04/03/08
+
+Starting Control File and SPFILE Autobackup at 04/03/08
+piece handle=C:\TEMP\RMAN_BACKUP_CONTROLFILE_C-2884833705-20080304-00 comment=NO
+NE
+Finished Control File and SPFILE Autobackup at 04/03/08
+
+RMAN> ALTER DATABASE OPEN
+2> ;
+
+database opened
+
+RMAN> EXIT
+
+
+Recovery Manager complete.
+
+C:\Documents and Settings\hrefaha.MOCT>
+
+############################################################################
+############# THIS THE FULL SCRIPT TO RESTORE
+rman target / nocatalog <<-EOF
+   shutdown immediate;
+   startup force dba;
+   shutdown immediate;
+   startup nomount;
+   RESTORE CONTROLFILE FROM '/u01/backup/rman_backup_controlfile_c-2081847505-20070730-05';
+   alter database mount;
+   RESTORE DATABASE FROM TAG before_upgrade;
+   recover database noredo;
+   alter database open resetlogs;
+EOF
+exit
+#############
+RESTORE SCRIPT
+Note the name of the backuped Controlfile, because this Name is needed for Restoring:
+C:\TEMP\RMAN_BACKUP_CONTROLFILE_C-2884833705-20080304-00
+
+
+
+C:\RMAN TARGET / NOCATALOG
+
+Recovery Manager: Release 10.1.0.2.0 - Production
+
+Copyright (c) 1995, 2004, Oracle.  All rights reserved.
+
+connected to target database: JOB (DBID=2884833705)
+using target database controlfile instead of recovery catalog
+
+
+RMAN> SHUTDOWN IMMEDIATE
+
+database closed
+database dismounted
+Oracle instance shut down
+
+RMAN> STARTUP FORCE DBA
+
+Oracle instance started
+database mounted
+database opened
+
+Total System Global Area     171966464 bytes
+
+Fixed Size                      787988 bytes
+Variable Size                145488364 bytes
+Database Buffers              25165824 bytes
+Redo Buffers                    524288 bytes
+
+RMAN> SHUTDOWN IMMEDIATE
+
+database closed
+database dismounted
+Oracle instance shut down
+
+RMAN> STARTUP NOMOUNT
+
+connected to target database (not started)
+Oracle instance started
+
+Total System Global Area     171966464 bytes
+
+Fixed Size                      787988 bytes
+Variable Size                145488364 bytes
+Database Buffers              25165824 bytes
+Redo Buffers                    524288 bytes
+
+RMAN> RESTORE CONTROLFILE FROM 'C:\TEMP\RMAN_BACKUP_CONTROLFILE_C-2884833705-200
+80304-00';
+
+Starting restore at 04/03/08
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: sid=160 devtype=DISK
+
+channel ORA_DISK_1: restoring controlfile
+channel ORA_DISK_1: restore complete
+output filename=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\CONTROL01.CTL
+output filename=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\CONTROL02.CTL
+output filename=D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\CONTROL03.CTL
+Finished restore at 04/03/08
+
+RMAN> ALTER DATABASE MOUNT;
+
+database mounted
+released channel: ORA_DISK_1
+
+RMAN> RESTORE DATABASE FROM TAG BEFORE_UPGRADE;
+
+Starting restore at 04/03/08
+Starting implicit crosscheck backup at 04/03/08
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: sid=160 devtype=DISK
+Crosschecked 2 objects
+Finished implicit crosscheck backup at 04/03/08
+
+Starting implicit crosscheck copy at 04/03/08
+using channel ORA_DISK_1
+Finished implicit crosscheck copy at 04/03/08
+
+searching for all files in the recovery area
+cataloging files...
+cataloging done
+
+no files cataloged
+
+using channel ORA_DISK_1
+
+channel ORA_DISK_1: starting datafile backupset restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+restoring datafile 00001 to D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\SYSTEM01.DBF
+restoring datafile 00002 to D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\UNDOTBS01.DBF
+restoring datafile 00003 to D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\SYSAUX01.DBF
+restoring datafile 00004 to D:\ORACLE\PRODUCT\10.1.0\ORADATA\JOB\USERS01.DBF
+restoring datafile 00005 to D:\HYPERMARKETS\JOB_USER.ORA
+restoring datafile 00006 to D:\HYPERMARKETS\JOB_MATERIAL_DATA1
+restoring datafile 00007 to D:\HYPERMARKETS\JOB_IDX1.ORA
+restoring datafile 00008 to D:\HYPERMARKETS\JOB_IDX2.ORA
+restoring datafile 00009 to D:\HYPERMARKETS\JOB_IDX3.ORA
+restoring datafile 00010 to D:\HYPERMARKETS\JOB_IDX4.ORA
+restoring datafile 00011 to D:\HYPERMARKETS\JOB_IDX5.ORA
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\TEMP\RMAN_BACKUP_DATABASE_01JADIK4_1_1 tag=BEFORE_UPGRADE
+channel ORA_DISK_1: restore complete
+Finished restore at 04/03/08
+
+RMAN> RECOVER DATABASE NOREDO;
+
+Starting recover at 04/03/08
+using channel ORA_DISK_1
+Finished recover at 04/03/08
+
+
+
+RMAN> ALTER DATABASE OPEN RESETLOGS;
+
+database opened
+
+RMAN>
+

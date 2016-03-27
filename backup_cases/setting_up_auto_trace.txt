@@ -1,0 +1,36 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+1. cd [ORACLE_HOME]/rdbms/admin
+2. log into SQL*Plus as SYSTEM
+3. Run @utlxplan
+4. Run CREATE PUBLIC SYNONYM PLAN_TABLE FOR PLAN_TABLE;
+5. Run GRANT ALL ON PLAN_TABLE TO PUBLIC;
+
+The next step is creating and granting the PLUSTRACE role:
+
+1. cd [ORACLE_HOME]/sqlplus/admin
+2. Log in to SQL*Plus as SYS or as SYSDBA
+3. Run @plustrce
+4. Run GRANT PLUSTRACE TO PUBLIC;
+
+About AUTOTRACE
+-----------------------------------
+You can automatically get a report on the execution path used by the SQL optimizer and the
+statement execution statistics. The report is generated after successful SQL DML (i.e., SELECT,
+DELETE, UPDATE, MERGE, and INSERT) statements. It is useful for monitoring and tuning the performance
+of these statements.
+
+Controlling the Report
+--------------------------------------------------------
+You can control the report by setting the AUTOTRACE system variable:
+• SET AUTOTRACE OFF: No AUTOTRACE report is generated. This is the default.
+• SET AUTOTRACE ON EXPLAIN: The AUTOTRACE report shows only the optimizer
+execution path.
+• SET AUTOTRACE ON STATISTICS: The AUTOTRACE report shows only the SQL statement
+execution statistics.

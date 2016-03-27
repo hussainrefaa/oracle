@@ -1,0 +1,6 @@
+run
+{ 
+	allocate channel c1 device type disk format 'c:\backup\%U';
+	backup incremental level=1  as compressed backupset database;
+	backup archivelog all delete all input;
+}

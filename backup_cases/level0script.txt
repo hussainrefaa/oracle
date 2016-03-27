@@ -1,0 +1,16 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+-- must to build catalog
+
+RMAN> create script level0backup
+2> {
+3> allocate channel c1 device type disk format 'c:\backup\%U';
+4> backup  as compressed backupset database;
+5>
+6> backup archivelog all delete all input;}

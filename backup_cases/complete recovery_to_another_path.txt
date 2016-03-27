@@ -1,0 +1,65 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+C:\>sqlplus
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Thu Mar 6 14:14:14 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+Enter user-name: sys/password as sysdba
+
+Connected to:
+Oracle Database 10g Enterprise Edition Release 10.2.0.1.0 - Production
+With the Partitioning, OLAP and Data Mining options
+
+SQL> select open_mode from v$database;
+
+OPEN_MODE
+----------
+READ WRITE
+
+SQL> select
+
+if any file is offline change to online
+in this command
+sql> alter database datafile 5 online;
+
+C:\>rman target sys/password@newh catalog hussen/password@catalog
+
+Recovery Manager: Release 10.2.0.1.0 - Production on Thu Mar 6 14:22:59 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+connected to target database: NEWH (DBID=1439038048)
+connected to recovery catalog database
+
+RMAN>sql  'alter database datafiele 5 offline';
+
+run{
+ set newname for datafile 5 to 'd:\users01.dbf';
+ restore datafile 5;
+ switch datafile 5;
+ recover datafile 5;
+ sql 'alter database datafile 5 online';
+}
+ 
+
+or in the tablespace case :
+RMAN>sql  'alter tablespace users offline';
+
+
+run{
+ set newname for datafile 5 to 'd:\users01.dbf';
+ restore tablespace users;
+ switch tablespace users;
+ recover tablespace users;
+ sql 'alter tablespace users online';
+}
+
+

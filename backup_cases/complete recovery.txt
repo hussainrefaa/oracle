@@ -1,0 +1,185 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+C:\>sqlpus
+'sqlpus' is not recognized as an internal or external command,
+operable program or batch file.
+
+C:\>sqlplus
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Tue Mar 4 15:44:35 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+Enter user-name: sys/password as sysdba
+
+Connected to:
+Oracle Database 10g Enterprise Edition Release 10.2.0.1.0 - Production
+With the Partitioning, OLAP and Data Mining options
+
+SQL> shut immediate
+Database closed.
+Database dismounted.
+ORACLE instance shut down.
+-- delete the UNDOTBS01.DBF, USERS01.DBF from the system
+
+SQL> startup
+ORACLE instance started.
+
+Total System Global Area  612368384 bytes
+Fixed Size                  1250428 bytes
+Variable Size             176163716 bytes
+Database Buffers          427819008 bytes
+Redo Buffers                7135232 bytes
+Database mounted.
+ORA-01157: cannot identify/lock data file 2 - see DBWR trace file
+ORA-01110: data file 2: 'D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\UNDOTBS01.DBF'
+
+-- to khnow the lost file this query
+SQL> select * from v$recover_file
+  2  ;
+
+-- to khnnow the agnist file_name
+SQL> select file#,name from v$datafile;
+
+
+-------------------------------------------
+--- to restore and recove 
+
+Microsoft Windows 2000 [Version 5.00.2195]
+(C) Copyright 1985-2000 Microsoft Corp.
+
+C:\>rman target sys/password@newh catalog hussen/hussen@catalog
+
+Recovery Manager: Release 10.2.0.1.0 - Production on Tue Mar 4 15:48:40 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+connected to target database: NEWH (DBID=1439038048, not open)
+RMAN-00571: ===========================================================
+RMAN-00569: =============== ERROR MESSAGE STACK FOLLOWS ===============
+RMAN-00571: ===========================================================
+RMAN-00554: initialization of internal recovery manager package failed
+RMAN-04004: error from recovery catalog database: ORA-01017: invalid username/pa
+ssword; logon denied
+
+C:\>rman target sys/password@newh catalog hussen/password@catalog
+
+Recovery Manager: Release 10.2.0.1.0 - Production on Tue Mar 4 15:49:05 2008
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+connected to target database: NEWH (DBID=1439038048, not open)
+connected to recovery catalog database
+
+RMAN> run
+2> {
+3> restore datafile 2;
+4> recover datafile 2;
+5> restore datafile 4;
+6> recover datafile 4;
+7> }
+
+Starting restore at 04-MAR-08
+allocated channel: ORA_DISK_1
+channel ORA_DISK_1: sid=155 devtype=DISK
+
+channel ORA_DISK_1: starting datafile backupset restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+restoring datafile 00002 to D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\UNDOTBS01.DBF
+channel ORA_DISK_1: reading from backup piece C:\BACKUP\0UJA8TC9_1_1
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\BACKUP\0UJA8TC9_1_1 tag=BACKUP_NEWH_SUNDAY_030208024234
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:09
+Finished restore at 04-MAR-08
+
+Starting recover at 04-MAR-08
+using channel ORA_DISK_1
+channel ORA_DISK_1: starting incremental datafile backupset restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+destination for restore of datafile 00002: D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH
+\UNDOTBS01.DBF
+channel ORA_DISK_1: reading from backup piece C:\BACKUP\14JA8UQJ_1_1
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\BACKUP\14JA8UQJ_1_1 tag=TAG20080302T150803
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:01
+
+starting media recovery
+
+archive log thread 1 sequence 14 is already on disk as file D:\ORACLE\PRODUCT\10
+.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELOG\2008_03_04\O1_MF_1_14_3WVL11YR_.ARC
+archive log thread 1 sequence 15 is already on disk as file D:\ORACLE\PRODUCT\10
+.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELOG\2008_03_04\O1_MF_1_15_3WVM6VMK_.ARC
+archive log thread 1 sequence 16 is already on disk as file D:\ORACLE\PRODUCT\10
+.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELOG\2008_03_04\O1_MF_1_16_3WVQRSCQ_.ARC
+channel ORA_DISK_1: starting archive log restore to default destination
+channel ORA_DISK_1: restoring archive log
+archive log thread=1 sequence=13
+channel ORA_DISK_1: reading from backup piece C:\BACKUP\15JA8UR6_1_1
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\BACKUP\15JA8UR6_1_1 tag=TAG20080302T150822
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:02
+archive log filename=D:\ORACLE\PRODUCT\10.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELO
+G\2008_03_04\O1_MF_1_13_3WVR1VYR_.ARC thread=1 sequence=13
+channel default: deleting archive log(s)
+archive log filename=D:\ORACLE\PRODUCT\10.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELO
+G\2008_03_04\O1_MF_1_13_3WVR1VYR_.ARC recid=28 stamp=648489020
+archive log filename=D:\ORACLE\PRODUCT\10.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELO
+G\2008_03_04\O1_MF_1_14_3WVL11YR_.ARC thread=1 sequence=14
+media recovery complete, elapsed time: 00:00:03
+Finished recover at 04-MAR-08
+
+Starting restore at 04-MAR-08
+using channel ORA_DISK_1
+
+channel ORA_DISK_1: starting datafile backupset restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+restoring datafile 00004 to D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH\USERS01.DBF
+channel ORA_DISK_1: reading from backup piece C:\BACKUP\0TJA8TBF_1_1
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\BACKUP\0TJA8TBF_1_1 tag=BACKUP_NEWH_SUNDAY_030208024234
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:02
+Finished restore at 04-MAR-08
+
+Starting recover at 04-MAR-08
+using channel ORA_DISK_1
+channel ORA_DISK_1: starting incremental datafile backupset restore
+channel ORA_DISK_1: specifying datafile(s) to restore from backup set
+destination for restore of datafile 00004: D:\ORACLE\PRODUCT\10.2.0\ORADATA\NEWH
+\USERS01.DBF
+channel ORA_DISK_1: reading from backup piece C:\BACKUP\14JA8UQJ_1_1
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\BACKUP\14JA8UQJ_1_1 tag=TAG20080302T150803
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:01
+
+starting media recovery
+
+archive log thread 1 sequence 14 is already on disk as file D:\ORACLE\PRODUCT\10
+.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELOG\2008_03_04\O1_MF_1_14_3WVL11YR_.ARC
+archive log thread 1 sequence 15 is already on disk as file D:\ORACLE\PRODUCT\10
+.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELOG\2008_03_04\O1_MF_1_15_3WVM6VMK_.ARC
+archive log thread 1 sequence 16 is already on disk as file D:\ORACLE\PRODUCT\10
+.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELOG\2008_03_04\O1_MF_1_16_3WVQRSCQ_.ARC
+channel ORA_DISK_1: starting archive log restore to default destination
+channel ORA_DISK_1: restoring archive log
+archive log thread=1 sequence=13
+channel ORA_DISK_1: reading from backup piece C:\BACKUP\15JA8UR6_1_1
+channel ORA_DISK_1: restored backup piece 1
+piece handle=C:\BACKUP\15JA8UR6_1_1 tag=TAG20080302T150822
+channel ORA_DISK_1: restore complete, elapsed time: 00:00:01
+archive log filename=D:\ORACLE\PRODUCT\10.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELO
+G\2008_03_04\O1_MF_1_13_3WVR2COZ_.ARC thread=1 sequence=13
+channel default: deleting archive log(s)
+archive log filename=D:\ORACLE\PRODUCT\10.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELO
+G\2008_03_04\O1_MF_1_13_3WVR2COZ_.ARC recid=29 stamp=648489035
+archive log filename=D:\ORACLE\PRODUCT\10.2.0\FLASH_RECOVERY_AREA\NEWH\ARCHIVELO
+G\2008_03_04\O1_MF_1_14_3WVL11YR_.ARC thread=1 sequence=14
+media recovery complete, elapsed time: 00:00:03
+Finished recover at 04-MAR-08
+
+RMAN>

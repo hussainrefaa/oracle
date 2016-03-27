@@ -1,0 +1,44 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+------ to backup control file
+sql> sys/oracle as sysdba
+
+sql> shutdown immediate;
+
+SQL> startup mount;
+
+SQL> alter database archivelog;
+
+SQL> alter database open;
+
+rman target sys/password@newh catalog hussen/hussen@catalog
+
+RMAN> configure controlfile autobackup on;
+
+
+------ to restore control file
+sql> sys/oracle as sysdba
+sql> startup nomount;
+
+rman target sys/password@newh catalog hussen/hussen@catalog
+
+
+RMAN> restore controlfile from autobackup;
+
+sql> alter database mount;
+
+RMAN> run
+     {
+	restore database;
+	recover database;
+     }
+
+RMAN> alter database open resetlogs;
+
+

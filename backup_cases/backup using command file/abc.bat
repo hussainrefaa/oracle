@@ -1,0 +1,1 @@
+rman target sys/password@newh cmdfile='c:\backup.txt'

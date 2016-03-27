@@ -1,0 +1,50 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+Hii
+ for the first database(source) you follow the same way to set the database 
+in archivelog and when you backup the database with archivelog you can delete 
+the input archivelog after backed up [ backup database plus archivelog delete input;]
+
+to make things easy you  make sure that the target database resides in the same location
+ as the source one, as well oracle_sid and instance_name so it turns to the situation 
+"recovering from lost control file"
+
+for the next database(target) you need to copy all the back set from the first one to some
+ directory accessible to the target database, configure rman so that it will search for the backupset
+ from that directory 
+-even you don't have to create the database using DBCA but it's ok.
+ -- get the source dbid
+sql> select dbid from v$database;
+1161144072
+-if your target database are runing, make sure it's shutdown using sql>shutdown immediate
+normar process[like recoverying from lost control file] 
+- RMAN> RMAN
+  RMAN> connect target /
+  RMAN> set dbid soruce-dbid
+  RMAN> startup nomount
+  RMAN> restore spfile from 'D:\backup\C-dbid-20070914-00';
+  or using from autobackup
+  RMAN> startup force nomount
+  RMAN> startup mount;
+  RMAN> show all; 
+  make sure you reset the configuration appropriately beacause it will be overwritten as 
+  the configuration are stored in the control  file unless u are using catalog
+   RMAN> restore database;
+   RMAN> recover database; //never do with noredo unless the backup are from noarchivelog database,
+         or u don't want to apply the redo that will cost u losing things!!
+   RMAN> alter database open resetlogs;
+
+here, u can make a full backup to the target [it's not an issue in 10g and later]
+No message is selected
+Click any message to view it in the reading pane. Attachments, pictures, and links from unknown 
+senders are blocked to help protect your privacy and safety.
+
+To show messages automatically when you select a folder, change your reading pane settings
+1 message is selected
+Mark as safe | Mark as unsafe 
