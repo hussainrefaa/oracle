@@ -1,0 +1,82 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+-- -----------------------------------------------------------------------------------
+SET SERVEROUTPUT ON
+SET FEEDBACK OFF
+SPOOL Backup.txt
+
+DECLARE
+
+    CURSOR c_tablespace IS
+        SELECT a.tablespace_name
+        FROM   dba_tablespaces a
+        ORDER BY 1;
+
+    CURSOR c_datafiles (in_ts_name  IN  VARCHAR2) IS
+        SELECT a.file_name
+        FROM   dba_data_files a
+        WHERE  a.tablespace_name = in_ts_name
+        ORDER BY 1;
+
+    CURSOR c_archive_redo IS
+        SELECT a.value 
+        FROM   v$parameter a
+        WHERE  a.name = 'log_archive_dest';
+
+    v_sid            VARCHAR2(100) := 'ORCL';
+    v_backup_com     VARCHAR2(100) := '!ocopy ';
+    v_remove_com     VARCHAR2(100) := '!rm';
+    v_dest_loc       VARCHAR2(100) := '/opt/oracleddds/dbs1/oradata/ddds/';
+
+BEGIN
+
+    DBMS_Output.Disable;
+    DBMS_Output.Enable(1000000);
+
+    DBMS_Output.Put_Line('svrmgrl');
+    DBMS_Output.Put_Line('connect internal');
+
+    DBMS_Output.Put_Line('	');
+    DBMS_Output.Put_Line('-- ----------------------');
+    DBMS_Output.Put_Line('-- Backup all tablespaces');
+    DBMS_Output.Put_Line('-- ----------------------');
+    FOR cur_ts IN c_tablespace LOOP
+        DBMS_Output.Put_Line('	');
+        DBMS_Output.Put_Line('ALTER TABLESPACE ' || cur_ts.tablespace_name || ' BEGIN BACKUP;');
+        FOR cur_df IN c_datafiles (in_ts_name => cur_ts.tablespace_name) LOOP
+            DBMS_Output.Put_Line(v_backup_com || ' ' || cur_df.file_name);
+        END LOOP;
+        DBMS_Output.Put_Line('ALTER TABLESPACE ' || cur_ts.tablespace_name || ' END BACKUP;');
+    END LOOP;
+
+    DBMS_Output.Put_Line('	');
+    DBMS_Output.Put_Line('-- -----------------------------');
+    DBMS_Output.Put_Line('-- Backup the archived redo logs');
+    DBMS_Output.Put_Line('-- -----------------------------');
+    FOR cur_ar IN c_archive_redo LOOP
+        DBMS_Output.Put_Line(v_backup_com || ' ' || cur_ar.value || '/*');
+    END LOOP;
+
+
+    DBMS_Output.Put_Line('	');
+    DBMS_Output.Put_Line('-- ----------------------');
+    DBMS_Output.Put_Line('-- Backup the controlfile');
+    DBMS_Output.Put_Line('-- ----------------------');
+    DBMS_Output.Put_Line('ALTER DATABASE BACKUP CONTROLFILE TO ''' || v_dest_loc || v_sid || 'Controlfile.backup'';');
+    DBMS_Output.Put_Line(v_backup_com || ' ' || v_dest_loc || v_sid || 'Controlfile.backup');
+    DBMS_Output.Put_Line(v_remove_com || ' ' || v_dest_loc || v_sid || 'Controlfile.backup');
+
+    DBMS_Output.Put_Line('	');
+    DBMS_Output.Put_Line('EXIT');
+
+END;
+/
+
+PROMPT
+SPOOL OFF
+SET FEEDBACK ON
