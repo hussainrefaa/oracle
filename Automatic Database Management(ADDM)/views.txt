@@ -1,0 +1,85 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+-- Resources in High Demand
+select active_session_history.event,
+sum(active_session_history.wait_time +
+active_session_history.time_waited) ttl_wait_time
+from v$active_session_history active_session_history
+where active_session_history.sample_time
+between sysdate - 60/2880 and sysdate
+group by active_session_history.event
+order by 2
+
+--------------------------------------------------------------
+-- Locked Objects
+
+SELECT o.owner, o.object_name, o.object_type,
+o.last_ddl_time, o.status, l.session_id,
+l.oracle_username, l.locked_mode
+FROM dba_objects o, gv$locked_object l
+WHERE o.object_id = l.object_id;
+---------------------------------------------------------------
+-- Long Running Operations
+
+select * from (
+select opname, target, sofar, totalwork,
+units, elapsed_seconds, message
+from v$session_longops order by start_time desc)
+where rownum <=10;
+
+---------------------------------------------------------------
+---User Waiting
+
+select sesion.sid,
+sesion.username,
+sum(active_session_history.wait_time +
+active_session_history.time_waited) ttl_wait_time
+from v$active_session_history active_session_history,
+v$session sesion
+where active_session_history.sample_time
+between sysdate - 60/2880 and sysdate
+and active_session_history.session_id = sesion.sid
+group by sesion.sid, sesion.username
+order by 3 ;
+
+---------------------------------------------------------------
+-- SQLs using Most Resources
+
+select active_session_history.user_id,
+dba_users.username,
+sqlarea.sql_text,
+sum(active_session_history.wait_time +
+active_session_history.time_waited) ttl_wait_time
+from v$active_session_history active_session_history,
+v$sqlarea sqlarea,
+dba_users
+where active_session_history.sample_time
+between sysdate - 60/2880 and sysdate
+and active_session_history.sql_id = sqlarea.sql_id
+and active_session_history.user_id = dba_users.user_id
+group by active_session_history.user_id,sqlarea.sql_text,
+dba_users.username
+order by 4;
+-----------------------------------------------------------------
+-- Objects Causing Highest Resource Waits
+
+select dba_objects.object_name,
+dba_objects.object_type,
+active_session_history.event,
+sum(active_session_history.wait_time +
+active_session_history.time_waited) ttl_wait_time
+from v$active_session_history active_session_history,
+dba_objects
+where active_session_history.sample_time
+between sysdate - 60/2880 and sysdate
+and active_session_history.current_obj# = dba_objects.object_id
+group by dba_objects.object_name,
+dba_objects.object_type, active_session_history.event
+order by 4
+-----------------------------------------------------------------
