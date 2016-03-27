@@ -1,0 +1,1 @@
+exp mof/mof@orcl buffer=21971520 owner=(mof) file=mof.dat log=mof.log
