@@ -1,0 +1,91 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+D:\>sqlplus / as sysdba
+
+SQL*Plus: Release 10.2.0.1.0 - Production on Pzt Eyl 24 17:25:24 2007
+
+Copyright (c) 1982, 2005, Oracle.  All rights reserved.
+
+Connected to:
+Oracle Database 10g Express Edition Release 10.2.0.1.0 - Production
+
+SQL> create table tong nologging as select * from dba_users ;
+
+Table created.
+
+SQL> alter table tong disable table lock;
+
+Table altered.
+
+SQL> drop table tong ;
+drop table tong
+           *
+ERROR at line 1:
+ORA-00069: cannot acquire lock -- table locks disabled for TONG
+
+SQL> alter table tong parallel ;
+alter table tong parallel
+*
+ERROR at line 1:
+ORA-00069: cannot acquire lock -- table locks disabled for TONG
+
+SQL> truncate table tong ;
+truncate table tong
+               *
+ERROR at line 1:
+ORA-00069: cannot acquire lock -- table locks disabled for TONG
+
+SQL> lock table tong in exclusive mode ;
+lock table tong in exclusive mode
+*
+ERROR at line 1:
+ORA-00069: cannot acquire lock -- table locks disabled for TONG
+
+SQL> lock table tong in share mode ;
+lock table tong in share mode
+*
+ERROR at line 1:
+ORA-00069: cannot acquire lock -- table locks disabled for TONG
+
+SQL> lock table tong in row share mode ;
+
+Table(s) Locked.
+
+SQL> update tong set username = 'TONG' ;
+
+15 rows updated.
+
+SQL> rollback ;
+
+Rollback complete.
+
+SQL> grant all on tong to public ;
+
+Grant succeeded.
+
+SQL> create index ix_tong on tong(username) nologging ;
+
+Index created.
+
+SQL> create view vw as select * from tong ;
+
+View created.
+
+SQL> drop view vw ;
+
+View dropped.
+
+SQL> alter table tong enable table lock ;
+
+Table altered.
+
+SQL> drop table tong ;
+
+Table dropped.
+

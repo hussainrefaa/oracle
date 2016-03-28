@@ -1,0 +1,39 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+SQL> conn sys/oracle as sysdba
+
+SQL> create directory BDUMP as 'c:\temp';
+
+
+SQL> CREATE TABLE ext_write (
+     tab_name, tblspname, numblocks)
+     ORGANIZATION EXTERNAL
+    (TYPE oracle_datapump
+     DEFAULT DIRECTORY BDUMP
+     LOCATION ('table_history.exp'))
+      PARALLEL
+     AS
+	SELECT table_name, tablespace_name, blocks
+	FROM user_tables;
+
+
+SQL>create table alert_log ( log_line varchar2(80) )
+organization external (
+type oracle_loader
+default directory BDUMP
+access parameters (records delimited by newline)
+location('alert_lnx1.log')
+)
+reject limit 1000;
+
+
+
+
+-- The table can now be queried, as follows:
+SQL> select * from ext_write;
