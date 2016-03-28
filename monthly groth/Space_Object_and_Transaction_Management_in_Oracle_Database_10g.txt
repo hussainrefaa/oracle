@@ -1,0 +1,209 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+-------------------------------------------------------------
+-- first step 
+-- Automatic Undo Retention Tuning
+-- Reset the undo low threshold.
+SQL> ALTER SYSTEM SET UNDO_RETENTION = 2400;
+
+-- Guarantee the minimum threshold is maintained.
+SQL> ALTER TABLESPACE undotbs1 RETENTION GUARANTEE;
+
+SQL> SELECT tablespace_name, retention FROM dba_tablespaces;
+
+
+-- Switch back to the default mode.
+SQL> ALTER TABLESPACE undotbs1 RETENTION NOGUARANTEE;
+
+-------------------------------------------------------------
+-- second step 
+-- Undo Advisor
+
+SQL> SELECT MIN(snap_id), MAX(snap_id) FROM dba_hist_snapshot;
+
+SQL>DECLARE
+  l_task_name  VARCHAR2(30) := '884_1052_AWR_SNAPSHOT_UNDO';
+  l_object_id  NUMBER;
+BEGIN
+  -- Create an ADDM task.
+  DBMS_ADVISOR.create_task (
+    advisor_name      => 'Undo Advisor',
+    task_name         => l_task_name,
+    task_desc         => 'Undo Advisor Task');
+
+  DBMS_ADVISOR.create_object (
+    task_name   => l_task_name,
+    object_type => 'UNDO_TBS',
+    attr1       => NULL, 
+    attr2       => NULL, 
+    attr3       => NULL, 
+    attr4       => 'null',
+    attr5       => NULL,
+    object_id   => l_object_id);
+
+  -- Set the target object.
+  DBMS_ADVISOR.set_task_parameter (
+    task_name => l_task_name,
+    parameter => 'TARGET_OBJECTS',
+    value     => l_object_id);
+
+  -- Set the start and end snapshots.
+  DBMS_ADVISOR.set_task_parameter (
+    task_name => l_task_name,
+    parameter => 'START_SNAPSHOT',
+    value     => 884);
+
+  DBMS_ADVISOR.set_task_parameter (
+    task_name => l_task_name,
+    parameter => 'END_SNAPSHOT',
+    value     => 1052);
+
+  -- Execute the task.
+  DBMS_ADVISOR.execute_task(task_name => l_task_name);
+END;
+/
+
+-----------------------------------------------------------------------
+-- third step 
+-- Segment Advisor
+-- Create a segment advisor task for the SCOTT.EMP table.
+
+DECLARE
+  l_object_id  NUMBER;
+BEGIN
+  -- Create a segment advisor task for the SCOTT.EMP table.
+  DBMS_ADVISOR.create_task (
+    advisor_name      => 'Segment Advisor',
+    task_name         => 'EMP_SEGMENT_ADVISOR',
+    task_desc         => 'Segment Advisor For EMP');
+
+  DBMS_ADVISOR.create_object (
+    task_name   => 'EMP_SEGMENT_ADVISOR',
+    object_type => 'TABLE',
+    attr1       => 'SCOTT', 
+    attr2       => 'EMP', 
+    attr3       => NULL, 
+    attr4       => 'null',
+    attr5       => NULL,
+    object_id   => l_object_id);
+
+  DBMS_ADVISOR.set_task_parameter (
+    task_name => 'EMP_SEGMENT_ADVISOR',
+    parameter => 'RECOMMEND_ALL',
+    value     => 'TRUE');
+
+  DBMS_ADVISOR.execute_task(task_name => 'EMP_SEGMENT_ADVISOR');
+
+  -- Create a segment advisor task for the USERS tablespace.
+  DBMS_ADVISOR.create_task (
+    advisor_name      => 'Segment Advisor',
+    task_name         => 'USERS_SEGMENT_ADVISOR',
+    task_desc         => 'Segment Advisor For USERS');
+
+  DBMS_ADVISOR.create_object (
+    task_name   => 'USERS_SEGMENT_ADVISOR',
+    object_type => 'TABLESPACE',
+    attr1       => 'USERS', 
+    attr2       => NULL, 
+    attr3       => NULL, 
+    attr4       => 'null',
+    attr5       => NULL,
+    object_id   => l_object_id);
+
+  DBMS_ADVISOR.set_task_parameter (
+    task_name => 'USERS_SEGMENT_ADVISOR',
+    parameter => 'RECOMMEND_ALL',
+    value     => 'TRUE');
+
+  DBMS_ADVISOR.execute_task(task_name => 'USERS_SEGMENT_ADVISOR');
+END;
+/ 
+
+-- Display the findings.
+SET LINESIZE 250
+COLUMN task_name FORMAT A20
+COLUMN object_type FORMAT A20
+COLUMN schema FORMAT A20
+COLUMN object_name FORMAT A30
+COLUMN object_name FORMAT A30
+COLUMN message FORMAT A40
+COLUMN more_info FORMAT A40
+
+SELECT f.task_name,
+       f.impact,
+       o.type AS object_type,
+       o.attr1 AS schema,
+       o.attr2 AS object_name,
+       f.message,
+       f.more_info
+FROM   dba_advisor_findings f
+       JOIN dba_advisor_objects o ON f.object_id = o.object_id AND f.task_name = o.task_name
+WHERE  f.task_name IN ('EMP_SEGMENT_ADVISOR', 'USERS_SEGMENT_ADVISOR')
+ORDER BY f.task_name, f.impact DESC;
+------------------------------------------------------------------------------------
+--- Online Segment Shrink
+-- Enable row movement.
+ALTER TABLE scott.emp ENABLE ROW MOVEMENT;
+
+-- Recover space and amend the high water mark (HWM).
+ALTER TABLE scott.emp SHRINK SPACE;
+
+-- Recover space, but don't amend the high water mark (HWM).
+ALTER TABLE scott.emp SHRINK SPACE COMPACT;
+
+-- Recover space for the object and all dependant objects.
+ALTER TABLE scott.emp SHRINK SPACE CASCADE;
+-----------------------------------------------------------------------------------
+--- New Segment Resource Estimation
+SET SERVEROUTPUT ON
+DECLARE
+  l_ddl          VARCHAR2(500);
+  l_used_bytes   NUMBER;
+  l_alloc_bytes  NUMBER;
+BEGIN
+  -- Estimate the size of a new table on the USERS tablespace.
+  DBMS_SPACE.create_table_cost (
+    tablespace_name => 'USERS',
+    avg_row_size    => 106,
+    row_count       => 1000000,
+    pct_free        => 10,
+    used_bytes      => l_used_bytes,
+    alloc_bytes     => l_alloc_bytes);
+    
+  DBMS_OUTPUT.put_line ('new table (TS=USERS): used=' || l_used_bytes ||
+                        ' bytes  allocated=' || l_alloc_bytes || ' bytes');
+
+  -- Estimate the size of a new index.
+  l_ddl := 'CREATE INDEX scott.emp_idx_1 ON scott.emp(job, mgr, hiredate)';
+  
+  DBMS_SPACE.create_index_cost (
+    ddl         => l_ddl,
+    used_bytes  => l_used_bytes,
+    alloc_bytes => l_alloc_bytes);
+    
+  DBMS_OUTPUT.put_line ('scott.emp_idx_1     : used=' || l_used_bytes ||
+                        ' bytes  allocated=' || l_alloc_bytes || ' bytes');
+END;
+/
+
+
+
+
+COLUMN timepoint FORMAT A30
+
+SELECT *
+FROM   TABLE(DBMS_SPACE.object_growth_trend ('SCOTT','EMP','TABLE'))
+ORDER BY timepoint;
+
+
+
+
+
+
+

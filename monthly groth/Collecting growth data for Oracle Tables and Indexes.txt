@@ -1,0 +1,139 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+--- Collecting growth data for Oracle Tables and Indexes
+--- is easy in Oracle10g using the AWR tables,
+--- but in previous releases you must create and populate special growth tables. 
+
+connect scott/tiger;
+
+
+
+drop table scott.stats$idx_stats;
+
+
+create table scott.stats$idx_stats
+(
+   snap_time         date,
+   server_name       varchar2(20),
+   db_name           varchar2(9),
+   tablespace_name   varchar2(40),
+   owner             varchar2(40),
+   index_name        varchar2(40),
+   clustering_factor number,
+   leaf_blocks       number,
+   blevel            number,
+   next_extent       number,
+   extents           number,
+   bytes             number
+)
+tablespace users
+storage (initial 1m next 1m maxextents unlimited)
+;
+
+
+drop index
+   scott.tab_stat_date_idx;
+
+create index
+   scott.tab_stat_date_idx
+on
+   scott.stats$tab_stats
+( snap_time )
+tablespace users
+storage (initial 1m next 1m maxextents unlimited)
+;
+
+
+drop index
+   scott.idx_stat_date_idx;
+create index
+   scott.idx_stat_date_idx
+on
+   scott.stats$idx_stats
+( snap_time )
+tablespace users
+storage (initial 1m next 1m maxextents unlimited)
+;
+
+
+-------------------------------------------
+---- now second step grab the index statistics
+--****************************************************************
+-- Now we grab the index statistics
+--****************************************************************
+ 
+-- add analyze and table collection commands here
+
+SQL> conn  sys/oracle as sysdba 
+
+insert into scott.stats$idx_stats
+(
+   select 
+      SYSDATE,
+      lower('${host}'),
+      lower('${ORCL}'),
+      i.tablespace_name,
+      i.owner,
+      i.index_name,
+      i.clustering_factor,
+      i.leaf_blocks,
+      i.blevel,
+      s.next_extent,
+      s.extents,
+      s.bytes
+   from dba_indexes  i,
+        dba_segments s,
+        dba_tables   t
+   where
+      i.table_name = t.table_name
+   and
+      segment_name = index_name
+   and
+      s.tablespace_name = i.tablespace_name
+   and   
+      s.owner = i.owner
+   and 
+      i.owner not in ('SYS','SYSTEM')
+--   and
+--      t.num_rows > 1000
+);
+
+
+-------------------------------------------------------
+--- third step Reports on Tables and Indexes
+
+column old_bytes format 999,999,999
+column new_bytes format 999,999,999
+column change    format 999,999,999
+
+select
+   new.index_name,
+   old.bytes                old_bytes,
+   new.bytes                new_bytes,
+   new.bytes - old.bytes    change
+from
+   scott.stats$idx_stats old,
+   scott.stats$idx_stats new
+where
+   old.index_name = new.index_name
+and
+   new.bytes > old.bytes
+and
+   new.bytes - old.bytes > 10000
+and
+   to_char(new.snap_time, 'YYYY-MM-DD') = 
+          (select max(to_char(snap_time,'YYYY-MM-DD')) from scott.stats$idx_stats) 
+and
+   to_char(old.snap_time, 'YYYY-MM-DD') = 
+           (select max(mydate) from old)
+and
+   new.index_name not like 'STATS$%'
+order by
+   new.bytes-old.bytes desc
+;
