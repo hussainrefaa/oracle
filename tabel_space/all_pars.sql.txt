@@ -1,0 +1,82 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+--------------------------------------------------
+---***---
+---***--- This script list all oracle parameters 
+---***--- in HTML format
+---***--- 
+---***---
+---***--- NOTE: PLEASE VERIFY THE SPOOL FILES
+--------------------------------------------------
+---***---
+---***--- Realised by Ghazi Ben Youssef, MBA
+---***--- Oracle Dba Sogique Canada
+---***---
+--------------------------------------------------
+SET heading off
+SET pagesize 0
+SET linesize 1000
+SET echo off
+SET feedback off
+SET VERIFY OFF
+
+drop table temp_env1;
+
+create table temp_env1 as
+select substr(name,1,40) as parameter_name,
+  substr(value,1,40) as Value 
+from v$parameter;
+
+spool all_param_value.html
+
+select '<' || 'html' || '><' || 'body'
+from dual;
+
+select '<' || 'table cellpading=0' || 
+  'cellspacing = 0 border=0>' 
+from dual;
+
+select '<' || tr bgcolor=#8080FF' || 
+  '><' || 'td colspan=2>' ||
+  '<' || 'h2>Oracle parameters<' || 
+  '/h2><' || '/td><' || '/tr>' 
+from dual;
+
+select '<' || 'tr' || 'bgcolor=#808080' || 
+  '>' || '<' || 'td><' || 
+  'b>Parameter name<' || '/b><' || 
+  '/td><' || 'td><' || 'b>Value<' || 
+  '/b><' || '/td><' || '/tr>' 
+from dual;
+
+select '<' || 'tr bgcolor=#C0C0C0><' || 
+  'td>' || env1.parameter_name || '<' || 
+  '/td><' || 'td>' || env1.Value || 
+  '<' || '/td>'|| '<' || '/tr><' || 
+  'tr><' || 'td height=2 colspan=2' || 
+  '>' || '<' || 'SPACER TYPE=block height=2' || 
+  '><' || '/td' || '><' || '/tr>' 
+from temp_env1 env1
+order by 1;
+
+select '<' || '/table' || '>' 
+from dual;
+
+select '<' || '/body' || '><' || 
+  '/html' || '>' 
+from dual;
+
+spool off
+
+drop table temp_env1;
+
+SET heading on
+SET feedback on
+SET pagesize 24
+SET linesize 80

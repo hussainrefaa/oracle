@@ -1,0 +1,39 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+create user account
+identified by account
+/
+
+grant create session,resource
+to account
+ /
+grant create table 
+to account
+/ 
+
+-- to make tablespace default to certain account
+alter user account DEFAULT TABLESPACE "MUNITBS";
+
+ ALTER TABLE ACCOUNT.TAB1 MOVE TABLESPACE MUNITBS;
+alter user account
+quota unlimited on MUNITBS;
+
+alter user account
+ quota 0 on USERS;
+
+conn account/account
+
+set serverout on;
+
+-- to make all users new & old save into certain tablespace
+ALTER DATABASE DEFAULT TABLESPACE "MUNITBS";
+
+-- generate script to move all tablespace to new table space
+select  'ALTER TABLE ' || TNAME || ' MOVE TABLESPACE MUNITBS' from tab;
+

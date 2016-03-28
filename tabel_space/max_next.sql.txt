@@ -1,0 +1,65 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM -----------------------------------------------
+REM Finds a segment with a largest next extent size
+REM on a specified tablespace.
+REM -----------------------------------------------
+REM Input: 
+REM   &1 - tablespace_name
+REM -----------------------------------------------
+
+SET PAGES 999 LINESIZE 120 TRIMS ON ECHO OFF VERIFY OFF FEEDBACK OFF
+
+
+TTITLE OFF
+CLEAR COLUMN
+
+SPOOL max_next.log
+
+PROMPT
+PROMPT ************************************************************************
+PROMPT * A segment with a largest next extent on a &1 tablespace 
+PROMPT ************************************************************************
+
+COLUMN owner FORMAT a10 HEADING "Owner"
+COLUMN segment_name FORMAT a21 HEADING "Segment Name"
+COLUMN segment_type FORMAT a12 HEADING "Segment Type"
+COLUMN "init_k" FORMAT 999,999,999 HEADING "Initial, K"
+COLUMN "next_k" FORMAT 999,999,999  HEADING "Next, K"
+COLUMN "size_k" FORMAT 999,999,999  HEADING "Size, K"
+COLUMN "ext" FORMAT 999,999 HEADING "Used Ext"
+COLUMN "max_ext" FORMAT 999,999 HEADING "Max Ext"
+
+
+SELECT S.owner, 
+  S.segment_name, 
+  S.segment_type, 
+  S.initial_extent/1024 AS "init_k", 
+  S.next_extent/1024 AS "next_k",
+  S.bytes/1024 AS "size_k",
+  S.extents "ext", 
+  S.max_extents "max_ext"
+FROM dba_segments S
+WHERE 1 > (SELECT Count(*) FROM dba_segments S2 
+	WHERE S.next_extent < S2.next_extent
+	 AND S2.tablespace_name = Upper('&1'))
+  AND S.tablespace_name = Upper('&1')
+ORDER BY S.next_extent DESC
+/
+
+
+SPOOL OFF
+CLEAR COLUMNS
+
+SET PAGES 24 LINESIZE 80 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON
+
+PROMPT
+PROMPT ************************************************************************
+PROMPT
+PROMPT Output saved at max_next.log
+PROMPT

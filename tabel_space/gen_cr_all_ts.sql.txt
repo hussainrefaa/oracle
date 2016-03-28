@@ -1,0 +1,83 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM ----------------------------------------------------
+REM  Generates a SQL script to recreate all tablespaces
+REM as locally managed, except SYSTEM, TEMP and RBS.
+REM ----------------------------------------------------
+
+SET PAGES 999 LINESIZE 100 TRIMS ON ECHO OFF VERIFY OFF FEEDBACK OFF
+SET SERVEROUTPUT ON
+
+TTITLE OFF
+CLEAR COLUMN
+
+SPOOL cr_all_ts.sql
+
+PROMPT
+
+declare
+
+    j number := 0;
+    wtablespace varchar2 (30);
+
+    cursor cdf is
+select T.tablespace_name 
+from dba_tablespaces T
+where T.tablespace_name Not In ('SYSTEM', 'TEMP', 'RBS');
+
+    cursor cdf2 is
+select F.tablespace_name, F.file_name, F.bytes
+from dba_data_files F
+where F.tablespace_name = Upper(wtablespace)
+order by F.tablespace_name, F.file_name;
+
+
+  begin
+
+    dbms_output.enable(100000);
+
+    for rdf in cdf loop
+
+      wtablespace := rdf.tablespace_name;
+
+        dbms_output.put_line( 'create tablespace ' || rdf.tablespace_name || );
+
+        j := 0;
+
+        for rdf2 in cdf2 loop
+
+          if j = 0 then
+            dbms_output.put_line( ' datafile ''' || rdf2.file_name || ''' size ' || rdf2.bytes );
+          else
+            dbms_output.put_line( ', datafile ''' || rdf2.file_name || ''' size ' || rdf2.bytes );
+          end if;
+
+          j := j + 1;
+
+        end loop;
+
+      dbms_output.put_line( 'extent management local autoallocate' );
+
+      dbms_output.put_line( '/ ' );
+
+    end loop;
+
+  end;
+/
+
+SPOOL OFF
+
+CLEAR COLUMN
+
+SET SERVEROUTPUT OFF
+SET PAGES 24 LINESIZE 80 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON
+
+PROMPT
+PROMPT Output saved at cr_all_ts.sql
+PROMPT
+            

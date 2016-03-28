@@ -1,0 +1,84 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM -----------------------------------------------
+REM  Displays storage, size information of the 
+REM  specified table.
+REM -----------------------------------------------
+REM Input:
+REM   &&1 - [owner].table_name
+REM--------------------------------------------------
+
+SET PAGES 999 TRIMS ON ECHO OFF VERIFY OFF FEEDBACK OFF LINES 100
+
+DEFINE s_owner_name = ' '
+DEFINE s_table_name = ' '
+
+COLUMN owner_name NOPRINT NEW_VALUE s_owner_name
+COLUMN table_name NOPRINT NEW_VALUE s_table_name
+
+SELECT 
+DECODE( InStr('&&1', '.'), 
+0, user,
+Upper(SubStr('&&1', 1, InStr('&&1', '.') - 1 )) ) AS owner_name, 
+DECODE( InStr('&&1', '.'), 
+0, Upper('&&1'),
+Upper(SubStr('&&1', InStr('&&1', '.') + 1 )) ) AS table_name
+FROM dual;
+
+TTITLE OFF
+CLEAR COLUMN
+
+SPOOL table_storage_info.log
+
+PROMPT ***********************************************************************************
+PROMPT * Table Size, Storage Info
+PROMPT ***********************************************************************************
+PROMPT * Owner: &&s_owner_name
+PROMPT * Table: &&s_table_name
+PROMPT ***********************************************************************************
+
+COLUMN tablespace_name FORMAT a10 HEADING "Tablespace"
+COLUMN "Size" FORMAT 999,999,999 HEADING "Size (K)"
+COLUMN "init_k" FORMAT 999,999 HEADING "Init (K)"
+COLUMN "next_k" FORMAT 999,999 HEADING "Next (K)"
+COLUMN min_extents FORMAT 999 HEADING "Min"
+COLUMN max_extents FORMAT 999,999 HEADING "Max"
+COLUMN extents FORMAT 999,999 HEADING "Extents"
+COLUMN pct_increase FORMAT 999 HEADING "PCT Inc"
+COLUMN pct_free_used FORMAT a7 HEADING "PCT F/U" 
+
+
+SELECT T.tablespace_name,
+   T2."Size",
+   T.initial_extent/1024 "init_k",
+   T.next_extent/1024 "next_k",
+   T.min_extents,
+   T.max_extents,
+   T2.extents,
+   T.pct_increase,
+   To_Char(T.pct_free) || '/' ||  To_Char(T.pct_used) AS pct_free_used
+FROM dba_tables T,
+   (SELECT S.Bytes/1024 "Size", 
+      extents
+    FROM dba_segments S
+    WHERE S.owner = '&&s_owner_name'
+      AND Upper(S.segment_name) = '&&s_table_name'
+      AND S.segment_type = 'TABLE') T2
+WHERE T.owner = '&&s_owner_name'
+AND   T.table_name = '&&s_table_name';
+
+SPOOL OFF
+CLEAR COLUMN
+
+SET PAGES 24 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON LINES 80 
+
+PROMPT
+PROMPT ***********************************************************************************
+PROMPT
+PROMPT Output saved at table_storage_info.log
+PROMPT

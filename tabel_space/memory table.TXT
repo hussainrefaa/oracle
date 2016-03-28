@@ -1,0 +1,41 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+rem -----------------------------------------------------------------------
+set serveroutput on size 50000
+
+DECLARE
+  CURSOR emp_cur IS SELECT * FROM EMP;
+
+  TYPE emp_tab_t IS TABLE OF emp%ROWTYPE INDEX BY BINARY_INTEGER;
+  emp_tab emp_tab_t;            -- In-memory table
+
+  rows NATURAL        := 10000;   -- Number of rows to process at a time
+  i    BINARY_INTEGER := 0;
+BEGIN
+  OPEN emp_cur;
+  LOOP
+    -- Bulk collect data into memory table - X rows at a time
+    FETCH emp_cur BULK COLLECT INTO emp_tab LIMIT rows;
+    EXIT WHEN emp_tab.COUNT = 0;
+
+    DBMS_OUTPUT.PUT_LINE( TO_CHAR(emp_tab.COUNT)|| ' rows bulk fetched.');
+
+    FOR i IN emp_tab.FIRST .. emp_tab.LAST loop
+      -- Manipumate data in the memory table...
+      dbms_output.put_line('i = '||i||', EmpName='||emp_tab(i).ename);
+    END LOOP;
+
+    -- Bulk bind of data in memory table...
+    FORALL i in emp_tab.FIRST..emp_tab.LAST
+      INSERT /*+APPEND*/ INTO emp2 VALUES emp_tab(i);
+
+  END LOOP;
+  CLOSE emp_cur;
+END;
+/

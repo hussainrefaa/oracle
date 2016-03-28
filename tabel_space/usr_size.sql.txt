@@ -1,0 +1,59 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+SET PAGES 999 LINESIZE 100 TRIMS ON ECHO OFF VERIFY OFF FEEDBACK OFF
+
+
+TTITLE OFF
+CLEAR COLUMN
+
+SPOOL usr_size.log
+
+PROMPT
+@./Ut/db.sql
+PROMPT
+PROMPT ****************************
+PROMPT * Schema and Tablespaces
+PROMPT ****************************
+
+
+COLUMN tablespace_name FORMAT a15 HEADING "Tablespace"
+COLUMN total_size_mb FORMAT 999,999 HEADING "Size (M)"
+
+SELECT tablespace_name, 
+  Sum(bytes)/1024/1024 AS total_size_mb
+FROM dba_segments
+WHERE owner = Upper('&1')
+GROUP BY owner, tablespace_name
+/
+
+PROMPT 
+PROMPT ****************************
+PROMPT * Total size of the schema
+PROMPT ****************************
+
+COLUMN owner FORMAT a15 HEADING "Username"
+COLUMN total_size_mb FORMAT 999,999 HEADING "Size (M)"
+
+SELECT owner, 
+  Sum(bytes)/1024/1024 AS total_size_mb
+FROM dba_segments
+WHERE owner = Upper('&1')
+GROUP BY owner
+/
+
+SPOOL OFF
+CLEAR COLUMN
+
+SET PAGES 24 LINESIZE 80 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON
+
+PROMPT
+PROMPT ****************************
+PROMPT
+PROMPT Output saved at usr_size.log
+PROMPT

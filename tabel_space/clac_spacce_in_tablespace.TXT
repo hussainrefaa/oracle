@@ -1,0 +1,97 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+ DOCUMENT_ID                               NOT NULL NUMBER(10)
+ DESCRIPTION                                        NVARCHAR2(255)
+ DOCTYPE_ID                                         NUMBER(10)
+ REFERNCE_DOCUMENT_ID                               NUMBER(10)
+ CREATOR_ID                                         NUMBER(10)
+ CREATE_DATE                                        TIMESTAMP(0)
+ MODIFICATION_DATE                                  TIMESTAMP(0)
+ PARENT_ID                                          NUMBER(10)
+ ISDELETED                                          NUMBER(1)
+ ISOPENED                                           NUMBER(1)
+ OPENEDBY                                           NUMBER(10)
+ DOCUMENT_NAME                                      NVARCHAR2(50)
+ PAGES                                              NUMBER(10)
+ FILE_ID                                            CHAR(10)
+
+
+
+select 
+(avg(nvl(vsize(document_id),0)) +
+avg(nvl(vsize(DESCRIPTION),0)) +
+avg(nvl(vsize(DOCTYPE_ID),0)) +
+avg(nvl(vsize(REFERNCE_DOCUMENT_ID),0)) +
+avg(nvl(vsize(CREATOR_ID),0)) +
+avg(nvl(vsize(CREATE_DATE),0)) +
+avg(nvl(vsize(MODIFICATION_DATE),0)) +
+avg(nvl(vsize(PARENT_ID),0)) +
+avg(nvl(vsize(ISDELETED),0)) +
+avg(nvl(vsize(ISOPENED),0)) +
+avg(nvl(vsize(OPENEDBY),0)) +
+avg(nvl(vsize(DOCUMENT_NAME),0)) +
+avg(nvl(vsize(PAGES),0)) +
+avg(nvl(vsize(FILE_ID),0)) ) data_lenght
+from documents
+
+DATA_LENGHT
+-----------
+ 92.9955673 ~= 100 byte
+
+
+this test contain the folwing values for paramaters :
+Number of record = 1360134 record
+Number of column = 14
+
+row length = DATA_LENGHT + 3 + Number of column + x
+row length = 100 + 3 + 14 = 117
+
+avilable area = (block size -90) *(1-PCTFREE%)
+avilable area = (4096-90) * (1-(90/100))
+avilable area = 400.6
+
+
+Number of Rows in block = avilable area / row length
+Number of Rows in block = 400.6 / 117 = 3.418
+
+
+Calculate the Available Data Space Per Data Block :
+segment size = (total number of rows / Number of Rows in block) * 1.2
+segment size = (1360134 / 3.418) * 1.2 = 
+
+
+			blocksize * (rows in 12 month * avg row length)
+table space size =	----------------------------------   
+			(blocksize - 90) ( 1- pctfree/100)
+
+                   4096 * ( 1360134 * 100)
+table space size = ----------------------------------   
+                   (4096 -90) (1-0.9)
+
+
+                   557110886400
+table space size = ----------------------------------   
+                   4006 * 0.1
+
+
+                   557110886400
+table space size = ----------------------------------   
+                   400.6
+
+
+table space size = 557110886400 /1024/1024 = 531 M
+
+<ESTIMATED_TABLE_SIZE> = MAX_ROW_LENGTH * (1 + PCTFREE/100) * number_of_rows * 1.15 
+
+<ESTIMATED_TABLE_SIZE> = 100 *(1 +0.9)* 1500000 *1.15
+<ESTIMATED_TABLE_SIZE> = 100 * 1.9 * 1500000 * 1.15
+<ESTIMATED_TABLE_SIZE> = 190 * 1500000 * 1.15 = 327750000 byte
+<ESTIMATED_TABLE_SIZE> = 327750000 byte / 1024 / 1024 = 312.5667572021484375 M
+
+

@@ -1,0 +1,20 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM -----------------------------------------------
+REM  Fixes default storage settings of a tablespace
+REM -----------------------------------------------
+REM Input:
+REM   &&1 - tablespace
+REM--------------------------------------------------
+
+SET VERIFY OFF
+
+alter tablespace &&1 
+default storage (initial 128K next 128K maxextents 1024 pctincrease 0);
+
+SET VERIFY ON

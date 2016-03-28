@@ -1,0 +1,58 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM  Shows full scans stats by users
+REM -----------------------------------------------
+
+SET PAGES 999 LINESIZE 150 TRIMS ON ECHO OFF VERIFY OFF FEEDBACK OFF
+
+TTITLE OFF
+CLEAR COLUMN
+
+PROMPT
+
+SPOOL full_scan.log
+
+COLUMN user_process FORMAT A20 HEADING "Username(Process ID)"
+COLUMN short_scans FORMAT 999,999,999 HEADING "Short Scans"
+COLUMN long_scans FORMAT 999,999,999 HEADING "Long Scans"
+COLUMN blocks_retrieved FORMAT 999,999,999 HEADING "Blocks Retrieved"
+COLUMN avr_scan_blocks FORMAT 999,999,999.99 HEADING "Avr Scan (blocks)"
+
+SELECT SS.username || '(' || se.sid || ') ' AS user_process,
+  Sum( Decode(name, 'table scans (short tables)', value) ) AS short_scans,
+  Sum( Decode(name, 'table scans (long tables)', value) ) AS long_scans,
+  Sum( Decode(name, 'table scan blocks gotten', value) ) AS block_retrieved,
+  (Sum( Decode(name, 'table scan blocks gotten', value) ) - 
+    (Sum( Decode(name, 'table scans (short tables)', value) ) * 5))
+    /
+    Sum( Decode(name, 'table scans (long tables)', value) ) AS avr_scan_blocks
+FROM v$session SS,
+  v$sesstat SE,
+  v$statname SN
+WHERE SE.statistic# = SN.statistic#
+  AND (name Like '%table scans (short tables)%'
+       OR
+       name Like '%table scans (long tables)%'
+       OR
+       name Like '%table scan blocks gotten%')
+  AND SE.sid = SS.sid
+  AND SS.username IS NOT NULL
+GROUP BY SS.username || '(' || SE.sid || ') '
+HAVING Sum( Decode(name, 'table scans (long tables)', value) ) <> 0
+ORDER BY long_scans DESC;
+
+SPOOL OFF
+CLEAR COLUMN
+
+SET PAGES 24 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON
+
+PROMPT
+PROMPT *********************************************
+PROMPT
+PROMPT Output saved at full_scan.log
+PROMPT

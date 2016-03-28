@@ -1,0 +1,22 @@
+
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM -----------------------------------------------
+REM  Fixes users settings
+REM -----------------------------------------------
+REM Input:
+REM   &&1 - username
+REM--------------------------------------------------
+
+SET VERIFY OFF
+
+alter user &&1 
+default tablespace USERS
+temporary tablespace TEMP;
+
+SET VERIFY ON

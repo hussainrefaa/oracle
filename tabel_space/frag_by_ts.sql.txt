@@ -1,0 +1,76 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+REM -----------------------------------------------
+REM Description:
+REM  Shows fragmentation by tablespaces.
+REM -----------------------------------------------
+REM Requires db.sql file
+REM -----------------------------------------------
+
+TTITLE OFF
+CLEAR COLUMN
+
+SPOOL frag_by_ts.log
+
+PROMPT
+@./Ut/db.sql
+PROMPT
+PROMPT ********************************************************
+PROMPT * Table Fragmentation Summary by Tablespaces
+PROMPT ********************************************************
+
+
+COLUMN tablespace_name FORMAT a15 HEADING "Tablespace"
+COLUMN "size_mb" FORMAT 999,999.99 HEADING "Size, MB"
+
+SELECT FE.tablespace_name,
+  Round(Sum(bytes)/1024/1024, 2) AS "size_mb"
+FROM dba_free_space FE,
+  (SELECT S.tablespace_name, Max(S.next_extent) AS "min_next_extent"
+   FROM dba_segments S
+   WHERE S.segment_type = 'TABLE'
+     AND S.tablespace_name <> 'SYSTEM'
+   GROUP BY S.tablespace_name) MS
+WHERE FE.tablespace_name = MS.tablespace_name
+AND FE.bytes < 10*MS."min_next_extent"
+GROUP BY FE.tablespace_name;
+
+
+PROMPT
+PROMPT ********************************************************
+PROMPT * Index Fragmentation Summary by Tablespaces
+PROMPT ********************************************************
+
+COLUMN tablespace_name FORMAT a15 HEADING "Tablespace"
+COLUMN "size_mb" FORMAT 999,999.99 HEADING "Size, MB"
+
+SELECT FE.tablespace_name,
+  Round(Sum(bytes)/1024/1024, 2) AS "size_mb"
+FROM dba_free_space FE,
+  (SELECT S.tablespace_name, Max(S.next_extent) AS "min_next_extent"
+   FROM dba_segments S
+   WHERE S.segment_type = 'INDEX'
+     AND S.tablespace_name <> 'SYSTEM'
+   GROUP BY S.tablespace_name) MS
+WHERE FE.tablespace_name = MS.tablespace_name
+AND FE.bytes < 10*MS."min_next_extent"
+GROUP BY FE.tablespace_name;
+
+
+SPOOL OFF
+CLEAR COLUMN
+
+SET PAGES 24 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON
+
+
+PROMPT
+PROMPT ********************************************************
+PROMPT
+PROMPT Output saved at frag_by_ts.log
+PROMPT

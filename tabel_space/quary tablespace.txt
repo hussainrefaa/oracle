@@ -1,0 +1,71 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+1- SELECT segment_name, tablespace_name, status FROM dba_rollback_segs;
+Used to display the rollback segments created by Oracle.
+ This is a classic view (not introduced in Oracle9i) 
+and can be used just like in previous versions.
+
+
+2- SELECT segment_name, tablespace_name, bytes, FREELISTS, FREELIST_GROUPS
+      FROM dba_segments WHERE segment_type in ('ROLLBACK', 'TYPE2 UNDO');
+OWNER                                              VARCHAR2(30)
+SEGMENT_NAME                                       VARCHAR2(81)
+PARTITION_NAME                                     VARCHAR2(30)
+SEGMENT_TYPE                                       VARCHAR2(18)
+TABLESPACE_NAME                                    VARCHAR2(30)
+HEADER_FILE                                        NUMBER
+HEADER_BLOCK                                       NUMBER
+BYTES                                              NUMBER
+BLOCKS                                             NUMBER
+EXTENTS                                            NUMBER
+INITIAL_EXTENT                                     NUMBER
+NEXT_EXTENT                                        NUMBER
+MIN_EXTENTS                                        NUMBER
+MAX_EXTENTS                                        NUMBER
+PCT_INCREASE                                       NUMBER
+FREELISTS                                          NUMBER
+FREELIST_GROUPS                                    NUMBER
+RELATIVE_FNO                                       NUMBER
+BUFFER_POOL                                        VARCHAR2(7)
+
+ select tablespace_name, sum(bytes)/1024/1024 as "MB" 
+from dba_temp_files group by tablespace_name;
+
+
+select tablespace_name,file_name,bytes/1024/1024 from dba_temp_files;
+
+select username,temporary_tablespace from dba_users 
+where username = 'TEMPUSER';
+
+select username,temporary_tablespace 
+from dba_users where username = 'TEMPUSER';
+
+ select username,temporary_tablespace,default_tablespace 
+        from dba_users where username = 'TEMPUSER';
+
+
+
+SELECT tbl.tablespace_name, tbl.table_name, col.column_name,
+       col.data_type, 
+       DECODE(col.data_type,
+         'CHAR',     TO_CHAR(col.data_length),
+         'VARCHAR2', TO_CHAR(col.data_length),
+         'DATE',     NULL,
+         'NUMBER',   DECODE(col.data_precision, NULL, NULL, '(' || col.data_precision || ',' || col.data_scale || ')')
+       ) col_size,
+       tbl.pct_free, tbl.pct_used, tbl.ini_trans, tbl.max_trans,
+       tbl.initial_extent, tbl.next_extent,
+       tbl.min_extents, tbl.max_extents, tbl.pct_increase
+  FROM dba_tables tbl, dba_tab_columns col
+ WHERE tbl.table_name = col.table_name
+   AND tbl.owner = 'SCOTT'
+   AND col.owner = 'SCOTT'
+ ORDER BY 1, 2, col.column_id
+
+

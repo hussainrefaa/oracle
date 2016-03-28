@@ -1,0 +1,106 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+REM -----------------------------------------------
+REM  Lists iformation about user: default storage,
+REM  system privileges, roles, objects priviliges.
+REM -----------------------------------------------
+REM Input:
+REM    &1 - User name
+REM -----------------------------------------------
+REM Requires db.sql file
+REM -----------------------------------------------
+
+SET PAGES 999 TRIMS ON ECHO OFF VERIFY OFF FEEDBACK OFF
+
+TTITLE OFF
+CLEAR COLUMN
+
+SPOOL user_info.log
+
+PROMPT
+@./Ut/db.sql
+PROMPT
+PROMPT ***************************************************
+PROMPT * User Info
+PROMPT ***************************************************
+
+COLUMN username FORMAT A10 HEADING "User"
+COLUMN default_tablespace FORMAT A16 HEADING "Default"
+COLUMN temporary_tablespace FORMAT A16 HEADING "Temp"
+COLUMN created FORMAT A9 HEADING "Created"
+
+SELECT username,
+  default_tablespace,
+  temporary_tablespace,
+  created
+FROM dba_users
+WHERE Upper(username) = Upper('&1')
+/
+
+
+PROMPT
+PROMPT ***************************************************
+PROMPT * Granted System Privileges 
+PROMPT ***************************************************
+
+COLUMN privilege FORMAT A30 HEADING "Privilege"
+COLUMN admin_option FORMAT A5 HEADING "Admin"
+
+SELECT privilege, admin_option
+FROM dba_sys_privs
+WHERE Upper(grantee) = Upper('&1')
+ORDER BY privilege
+/
+
+
+PROMPT
+PROMPT ***************************************************
+PROMPT * Granted Granted Roles 
+PROMPT ***************************************************
+
+COLUMN granted_role FORMAT A30 HEADING "Role"
+COLUMN admin_option FORMAT A5 HEADING "Admin"
+COLUMN default_role FORMAT A5 HEADING "Default"
+
+SELECT granted_role, admin_option, default_role
+FROM dba_role_privs
+WHERE Upper(grantee) = Upper('&1')
+ORDER BY granted_role
+/
+
+
+PROMPT
+PROMPT ***************************************************
+PROMPT * Granted Privileges on Objects
+PROMPT ***************************************************
+
+COLUMN "Object" FORMAT A30 HEADING "Object"
+COLUMN grantor FORMAT A10 HEADING "Grantor"
+COLUMN privilege FORMAT A30 HEADING "Privilege"
+COLUMN grantable FORMAT A5 HEADING "Admin"
+
+SELECT owner || '.' || table_name AS "Object",
+  grantor, 
+  privilege, 
+  grantable
+FROM dba_tab_privs
+WHERE Upper(grantee) = Upper('&1')
+ORDER BY owner || '.' || table_name
+/
+
+
+SPOOL OFF
+CLEAR COLUMN
+
+SET PAGES 24 TRIMS ON ECHO OFF VERIFY ON FEEDBACK ON
+
+PROMPT
+PROMPT ***************************************************
+PROMPT
+PROMPT Output saved at user_info.log
+PROMPT
