@@ -1,14 +1,11 @@
-Microsoft Windows XP [Version 5.1.2600]
-(C) Copyright 1985-2001 Microsoft Corp.
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
 
-C:\Documents and Settings\hrefaha.MOCT>RMAN TARGET / NOCATALOG
-
-Recovery Manager: Release 10.1.0.2.0 - Production
-
-Copyright (c) 1995, 2004, Oracle.  All rights reserved.
-
-connected to target database: JOB (DBID=2884833705)
-using target database controlfile instead of recovery catalog
 
 ####### THIS IS THE FULL SCRIPT TO BACKUP
 rman target / nocatalog <<-EOF

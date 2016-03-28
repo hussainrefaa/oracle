@@ -1,11 +1,12 @@
-SQL*Plus: Release 10.1.0.2.0 - Production on C?I??? CE??? 24 12:49:57 2008
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
 
-Copyright (c) 1982, 2004, Oracle.  All rights reserved.
-
-
-Connected to:
-Oracle Database 10g Enterprise Edition Release 10.1.0.2.0 - Production
-With the Partitioning, OLAP and Data Mining options
+---
 
 SQL>  SHOW PARAMETER AUDIT
 
