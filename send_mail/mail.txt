@@ -1,0 +1,173 @@
+-- Author: 	Hussen refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+REM
+REM example8i.sql - A PL/SQL code example to demonstrate how to use the UTL_SMTP
+REM package to send emails in ASCII and non-ASCII character sets, emails
+REM with text or binary attachments. This example uses the demo_mail helper
+REM package that utilizes the UTL_SMTP package to send emails via SMTP.
+REM  
+REM @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+REM Note: this example relies on another demo PL/SQL package to encode
+REM binary attachment in Base-64 encoding format. The performance of this
+REM Base-64 encoding package is slow due to excessive string parsing and
+REM byte manipulation in PL/SQL. A native implemenation of this function is
+REM provided in Oracle 9i release. If you upgrade to Oracle 9i, replace the
+REM call to the demo Base-64 encoding package with the call to the
+REM native one.
+REM @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+REM Send an email in text to two recipients
+
+BEGIN
+  demo_mail.mail(
+    sender     => 'Me <me@some-company.com>',
+    recipients => 'Someone <someone@some-company.com>, ' ||
+                  '"Another one" <another-one@some-company.com>',
+    subject    => 'Test',
+    message    => 'Hi! This is a test.');
+END;
+/
+
+REM Send an email in HTML
+
+DECLARE
+  conn utl_smtp.connection;
+BEGIN
+  conn := demo_mail.begin_mail(
+    sender     => 'Me <me@some-company.com>',
+    recipients => 'Someone <someone@some-company.com>',
+    subject    => 'HTML E-mail Test',
+    mime_type  => 'text/html');
+
+  demo_mail.write_text(
+    conn    => conn,
+    message => '<h1>Hi! This is a <i>test</i>.</h1>');
+  
+  demo_mail.end_mail( conn => conn );
+
+END;
+/
+
+REM Send an email with 2 attachments.
+
+DECLARE
+  conn      utl_smtp.connection;
+  pieces    utl_http.html_pieces;
+  data      RAW(2100);
+  chunks    PLS_INTEGER;
+  pos       PLS_INTEGER;
+  len       PLS_INTEGER;
+BEGIN
+  conn := demo_mail.begin_mail(
+    sender     => 'Me <me@some-company.com>',
+    recipients => 'Someone <someone@some-company.com>',
+    subject    => 'Attachment Test',
+    mime_type  => demo_mail.MULTIPART_MIME_TYPE);
+
+  demo_mail.attach_text(
+    conn      => conn,
+    data      => '<h1>Hi! This is a test.</h1>',
+    mime_type => 'text/html');
+  
+  demo_mail.begin_attachment(
+    conn         => conn,
+    mime_type    => 'image/gif',
+    inline       => TRUE,
+    filename     => 'image.gif',
+    transfer_enc => 'base64');
+
+  -- In writing Base-64 encoded text following the MIME format below,
+  -- the MIME format requires that a long piece of data must be splitted
+  -- into multiple lines and each line of encoded data cannot exceed
+  -- 80 characters, including the new-line characters. Also, when
+  -- splitting the original data into pieces, the length of each chunk
+  -- of data before encoding must be a multiple of 3, except for the
+  -- last chunk. The constant demo_mail.MAX_BASE64_LINE_WIDTH
+  -- (76 / 4 * 3 = 57) is the maximum length (in bytes) of each chunk
+  -- of data before encoding.
+
+  -- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  -- In Oracle 9i, the UTL_HTTP package provides new API to read
+  -- binary data over HTTP. Please see example.sql for details.
+  -- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+  pieces := utl_http.request_pieces('http://www.some-company.com/image.gif');
+
+  FOR i IN 1..pieces.count LOOP
+    data := utl_raw.concat(data, utl_raw.cast_to_raw(pieces(i)));
+    chunks := utl_raw.length(data) / demo_mail.MAX_BASE64_LINE_WIDTH;
+    IF (i <> pieces.count) THEN
+      chunks := chunks - 1;
+    END IF;
+ 
+    FOR j IN 0..chunks LOOP
+
+      pos := j * demo_mail.MAX_BASE64_LINE_WIDTH + 1;
+      IF (j <> chunks) THEN
+        len := demo_mail.MAX_BASE64_LINE_WIDTH;
+      ELSE
+        len := utl_raw.length(data) - pos + 1;
+        IF (len > demo_mail.MAX_BASE64_LINE_width) THEN
+          len := demo_mail.MAX_BASE64_LINE_WIDTH;
+        END IF;
+      END IF;
+	 
+      -- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      -- After upgrade to Oracle 9i, replace demo_base64.encode with the 
+      -- native utl_encode.base64_encode for better performance:
+      --
+      --   demo_mail.write_raw(conn, utl_encode.base64_encode(data));
+      --
+      -- @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+      IF (len > 0) THEN
+        demo_mail.write_text(
+          conn    => conn,
+          message => demo_base64.encode(utl_raw.substr(data, pos, len)) ||
+                                        utl_tcp.CRLF);
+      END IF;
+    END LOOP;
+    IF (pos + len <= utl_raw.length(data)) THEN
+      data := utl_raw.substr(data, pos + len);
+    ELSE
+      data := NULL;
+    END IF;
+  END LOOP;
+  demo_mail.end_attachment( conn => conn );
+
+  demo_mail.attach_text(
+    conn      => conn,
+    data      => '<h1>This is a HTML report.</h1>',
+    mime_type => 'text/html',
+    inline    => FALSE,
+    filename  => 'report.htm',
+    last      => TRUE);
+  
+  demo_mail.end_mail( conn => conn );
+
+END;
+/
+
+REM Send an email in Chinese (big5). This needs to be executed in a database
+REM with ZHT16BIG5 character set.
+
+DECLARE
+  conn utl_smtp.connection;
+BEGIN
+  conn := demo_mail.begin_mail(
+    sender     => 'Me <me@some-company.com>',
+    recipients => 'Someone <someone@some-company.com>',
+    subject    => 'Chinese Email Test',
+    mime_type  => 'text/plain; charset=big5');
+
+  demo_mail.write_mb_text(
+    conn    => conn,
+    message => 'message' || utl_tcp.CRLF);
+
+  demo_mail.end_mail( conn => conn );
+END;
+/
