@@ -1,10 +1,10 @@
 -- ///////////////////////////////////////////////////////////////////
 -- PL/SQL sample source code #9
--- Author:        Hussen refaa
+-- Author:        Hussain refaa
 -- Creation Date: 2001-12-01
 -- Last Modified: 0000-00-00
 -- Copyright (c) 2001 by Hussen refaa
--- Author: 	Hussen refaa
+-- Author: 	Hussain refaa
 -- creation Date: 	2008
 -- Last Updated: 	0000-00-00
 -- Control Number:	xxxx-xxxx-xxxx-xxxx
