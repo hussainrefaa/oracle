@@ -1,0 +1,103 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+SQL> show parameter sga_target
+
+SQL> show parameter sga_max_size
+
+
+SQL> alter system set sga_target = 400m;
+
+
+------ query and views
+SQL> select * from v$sga;
+
+--- to khnow lof buffer
+SQL> select * from v$sgastat where name = 'log_buffer';
+
+---- to khnow java pool 
+SELECT * FROM V$SGASTAT WHERE pool = 'java pool';
+
+--- shared pool size
+SQL> select substr(name,1,25), value/1024/1024 "Size MB" from v$parameter
+     where name = 'shared_pool_size';
+
+--- size all values in mega byte
+SQL> select pool, name, round(bytes/1024/1024,2) "Size (MB)" from v$sgastat;
+
+---- DATA DICTIONARY CACHE
+
+SQL> select sum(gets) "Gets", sum(getmisses) "Get Misses",
+     (1-(sum(getmisses)/sum(gets))) * 100 "Hit Ratio" from v$rowcache;
+
+--- Find the SID for an example user session:
+SQL> select sid from v$process p, v$session s 
+     where p.addr=s.paddr and s.username='OPS$JSMITH';
+
+-- Get the maximum session memory for this session:
+SQL> select value from v$sesstat s, v$statname n 
+     where s.statistic# = n.statistic# 
+     and n.name = 'session uga memory max' and sid=29;
+
+-- Get the total shared SQL area:
+SQL> select sum(sharable_mem) from v$sqlarea;
+
+
+-- Get the PLSQL sharable memory area:
+SQL> select sum(sharable_mem) from v$db_object_cache;
+
+
+---- Our query of v$session and v$sqlarea looked something like this:
+
+SELECT B.sql_text
+FROM   v$session A, v$sqlarea B
+WHERE  A.osuser = 'EDI_LOAD'
+AND    B.address = A.sql_address;
+
+--- The maximum amount of UGA memory allocated at a given
+--- moment can be determined with the following query: 
+
+SELECT SUM (value) "MTS max memory allocation"
+FROM   v$sesstat ss, v$statname st 
+WHERE  st.name = 'session uga memory max'
+AND    ss.statistic# = st.statistic#;
+
+--- The number of MTS connections currently in
+--- existence can be measured with the following query: 
+
+SELECT COUNT (*)
+FROM   v$session 
+WHERE  server != 'DEDICATED';
+
+
+------------------------------------------------------------------------
+------------------------------------------------------------------------
+
+-- how to enable automatic shred memory management:
+SQL> alter system set shared_pool_size=20m scope=spfile;
+
+System altered.
+
+SQL> alter system set db_cache_size=5m scope=spfile;
+
+System altered.
+
+SQL> alter system set large_pool_size=2m scope=spfile;
+
+System altered.
+
+SQL> alter system set java_pool_size=5m scope=spfile;
+
+System altered.
+
+SQL> alter system set sga_target=160m;
+
+System altered.
+
+SQL> alter system set sga_max_size=200m scope=spfile;
+

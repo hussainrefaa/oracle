@@ -1,0 +1,167 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+------------ views and query
+
+-- but i have observed that sys as sysdba then this user is
+-- connected as shared and all other users are connected as None
+SQL> select username,server
+2 from v$session;
+--------------------------------------------------
+
+--- to get the memory for a seesion
+SQL> SELECT p.NAME,
+  2         s.VALUE
+  3  FROM   v$sessTat s,
+  4         v$sTatName p
+  5  WHERE  s.sTatIsTic# = p.sTatIsTic#
+  6         AND p.NAME IN ('session uga memory',
+  7                        'session uga memory max')
+  8         AND s.sId IN (SELECT sId
+  9                       FROM   v$Session
+ 10                       WHERE  UserName = 'SCOTT');
+
+no rows selected
+
+Elapsed: 00:00:00.04
+
+--------- here there area nobody connect as scott
+------------------------------------------------------------
+SQL> /
+
+NAME                                                                  VALUE
+---------------------------------------------------------------- ----------
+session uga memory                                                   222552
+session uga memory max                                               418944
+
+Elapsed: 00:00:00.01
+
+
+------------------------------------------------------------
+--- here one session to scott
+SQL> /
+
+NAME                                                                  VALUE
+---------------------------------------------------------------- ----------
+session uga memory                                                   222552
+session uga memory max                                               607860
+
+Elapsed: 00:00:00.01
+SQL> 
+------------------------------------------------------------
+--- here tow session to scott
+SQL> /
+
+NAME                                                                  VALUE
+---------------------------------------------------------------- ----------
+session uga memory                                                   222552
+session uga memory                                                   157088
+session uga memory max                                               607860
+session uga memory max                                               157088
+
+
+
+--------------------------------------
+if you guesstimate that 35 users may be connecting at a given
+ time then you can configure about 35*(607860/1024) i.e., about 2077 KB of memory
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+-- configured shared server 
+-- first step
+SQL>alter system set dispatchers="(protocol=TCP)(dispatchers=3)(connections=4)"
+
+SQL>alter system set dispatchers="(protocol=NMP)(dispatchers=2)(connections=4)";
+
+SQL>alter system set max_dispatchers=10;
+
+-- The following statement reduces the number of shared servers:
+SQL> ALTER SYSTEM SET SHARED_SERVERS = 5;
+
+-- Setting SHARED_SERVERS to 0 disables shared server. 
+SQL> ALTER SYSTEM SET SHARED_SERVERS = 0;
+
+SQL> ALTER SYSTEM SET SHARED_SERVER_SESSIONS = 2;
+
+---- this define tha max session
+--- at laset 5 there 3 session busy by system
+SQL> ALTER SYSTEM SET MAX_SHARED_SERVERS =5;
+
+
+SQL> alter system set circuits = 300;
+
+-- To shut down dispatcher D002, issue the following statement:
+
+SQL> ALTER SYSTEM SHUTDOWN IMMEDIATE 'D002';
+
+-- To terminate dispatchers once all shared server clients disconnect, enter this statement:
+
+SQL> ALTER SYSTEM SET DISPATCHERS = '';
+
+
+
+
+---------------------------------------
+SQL>column NAME_COL_PLUS_SHOW_PARAM format a40
+SQL>column VALUE_COL_PLUS_SHOW_PARAM format a40
+------------------------------------------------------------------
+------------------------------------------------------------------
+------------------------------------------------------------------
+SQL>sho parameter disp
+
+NAME_COL_PLUS_SHOW_PARAM TYPE VALUE_COL_PLUS_SHOW_PARAM
+---------------------------------------- ----------- ----------------------------------------
+dispatchers string (protocol=TCP)(dispatchers=3)(connection
+s=100), (protocol=NMP)(dispatchers=2)(co
+nnections=100)
+max_dispatchers integer 10
+
+
+
+-- second step
+-- IN TNSNAME.ORA FILE
+
+
+orcl=
+(DESCRIPTION=
+(ADDRESS_LIST=
+(ADDRESS= (PROTOCOL=TCP) (HOST=saibal.ghosh.org) (PORT=1521)))
+(CONNECT_DATA=(SERVICE_NAME=saibal) (SERVER=DEDICATED)))
+
+----------------------
+-- ANOTHER WAY
+-- Another less flexible way to do it would be through the sqlnet.ora file. 
+-- Just set the parameter : 
+
+USE_DEDICATED_SERVER=ON 
+-----------------------------------------------------------
+
+-----------------------------------------------------------
+---- notes
+1- cannot startup/shutdown database when connected to a dispatcher
+   example : 
+   when u setting dispatchers and service = shared like this :
+
+ORCL =
+  (DESCRIPTION =
+    (ADDRESS = (PROTOCOL = TCP)(HOST = it14-pc.MOCT.com)(PORT = 1521))
+    (CONNECT_DATA =
+      (SERVER = shared)
+      (SERVICE_NAME = orcl) 
+    )
+  )
+
+--- you will get an error  when you try to shutdown 
+SQL> shut immediate
+ORA-00106: cannot startup/shutdown database when connected to a dispatcher
+
+------------
+2- Shared servers do not support the use of RMAN. So,
+   if you are going to use RMAN, then you have to use a separate dedicated server connection as well.
+
