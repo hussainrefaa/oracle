@@ -1,0 +1,39 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2010
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : + 4915775148443
+-- Email: hus244@gmail.com
+
+How to manage DBMS_PARALLEL_EXECUTE tasks connections?
+you have an ETL user, authorized to use a specific service (ETL_SERVICE), on an exadata box.
+
+What we want to know first is the database behavior as of now; then next step is to tune it.
+ Do this in your code. Basically you are gathering information on where your session is going.
+ So in Sys context get service name of the session.  
+ 
+DECLARE
+l_sql_stmt VARCHAR2(32767);
+BEGIN
+l_sql_stmt := 'UPDATE test_tab t 
+SET t.num_col = t.num_col + 10,
+t.session_id = SYS_CONTEXT(''USERENV'',''SESSIONID'')
+WHERE rowid BETWEEN :start_id AND :end_id';
+
+DBMS_PARALLEL_EXECUTE.run_task(task_name => 'test_task',
+sql_stmt => l_sql_stmt,
+language_flag => DBMS_SQL.NATIVE,
+parallel_level => 10);
+END;
+/
+SELECT session_id, COUNT(*)
+FROM test_tab
+GROUP BY session_id
+ORDER BY session_id;
+
+SESSION_ID COUNT(*)
+---------- ----------
+232639 65041
+232640 54029
+232641 53571
