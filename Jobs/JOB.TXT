@@ -1,0 +1,36 @@
+truncate table track;
+drop table track;
+drop procedure ins_track;
+
+create table track (a varchar2(100));
+
+
+
+create or replace procedure ins_track1
+    as
+     begin
+      insert into track values(to_char(sysdate,'hh24:mi:ss'));
+      commit;
+     end;
+    /
+
+
+declare
+     v number;
+      i int;
+ begin
+     
+     --Execute every 3 sec.   
+     --'SYSDATE + 3/86400' 86400 mean the number of sec in the day
+     dbms_job.submit(v,'ins_track1;',sysdate,'SYSDATE + 30/86400',true);
+     dbms_job.run(v);
+     --dmbs_job.broken(v);     
+    
+ end;
+ /
+
+
+select * from track;
+select sysdate from dual;
+
+

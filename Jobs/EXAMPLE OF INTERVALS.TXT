@@ -1,0 +1,83 @@
+Execute daily           'SYSDATE + 1'
+Execute once per week   'SYSDATE + 7'
+Execute hourly          'SYSDATE + 1/24'
+Execute every 10 min.   'SYSDATE + 10/1440'  1440 mean the number of min in the day
+Execute every 30 sec.   'SYSDATE + 30/86400' 86400 mean the number of sec in the day
+
+dbms_job.submit(
+   what=>'statspack_alert.sql;', 
+   next_date=>sysdate+1/24, -- start next hour 
+   interval=>'sysdate+1/24');  -- Run every hour
+--
+--  Schedule a snapshot to be run on this instance every hour
+ 
+variable jobno number;
+variable instno number;
+begin
+ 
+  select instance_number into :instno from v$instance;
+-- ------------------------------------------------------------
+-- Submit job to begin at 0600 and run every hour
+-- ------------------------------------------------------------
+dbms_job.submit(
+   :jobno, 'statspack.snap;', 
+   trunc(sysdate)+6/24, 
+   'trunc(SYSDATE+1/24,''HH'')', 
+   TRUE, 
+   :instno);
+ 
+-- ------------------------------------------------------------
+-- Submit job to begin at 0900 and run 12 hours later
+-- ------------------------------------------------------------
+dbms_job.submit(
+   :jobno, 
+   'statspack.snap;', 
+   trunc(sysdate+1)+9/24, 
+   'trunc(SYSDATE+12/24,''HH'')', 
+   TRUE, 
+   :instno);
+ 
+-- ------------------------------------------------------------
+-- Submit job to begin at 0600 and run every 10 minutes
+-- ------------------------------------------------------------
+dbms_job.submit(
+   :jobno, 
+   'statspack.snap;',
+   trunc(sysdate+1/144,'MI'),
+   'trunc(sysdate+1/144,''MI'')', 
+   TRUE, 
+   :instno);
+ 
+-- ----------------------------------------------------------------
+-- Submit job to begin at 0600 and run every hour, Monday - Friday
+-- ----------------------------------------------------------------
+dbms_job.submit(
+   :jobno, 
+   'statspack.snap;', 
+   trunc(sysdate+1)+6/24,
+   'trunc(
+     least(
+       next_day(SYSDATE,''MONDAY''), 
+       next_day(SYSDATE,''TUESDAY''), 
+       next_day(SYSDATE,''WEDNESDAY''), 
+       next_day(SYSDATE,''THURSDAY''), 
+       next_day(SYSDATE,''FRIDAY'') 
+     )
+    +1/24,''HH'')', 
+   TRUE, 
+   :instno);
+ 
+  commit;
+end;
+/
+
+
+variable jobno number;
+begin
+  dbms_job.submit(:jobno,'job_sql;',
+to_date('11.02.2003 1:45:00','DD.MM.YYYY HH24:MI:SS'), 
+'sysdate+1');
+  commit;
+end;
+/
+

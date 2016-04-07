@@ -1,0 +1,23 @@
+@echo off
+rem -----------------------------------------------------------------------
+rem Filename:   sched.bat
+rem Purpose:    Schedule a job to execute at regular intervals on MS-
+rem             Windows NT/ 2000
+rem Date:       05-Mar-2002
+rem Author:     Frank Naude, Oracle FAQ
+rem -----------------------------------------------------------------------
+
+rem -- Add job to scheduling queue --
+rem Run batch job DBExp.BAT at 02H00 every Sunday morning
+AT 02:00 /EVERY:SUNDAY "C:\BATCH\DBExp.BAT"
+
+rem -- List jobs in scheduling queue --
+AT
+
+rem -- Remove all jobs from scheduling queue --
+rem AT /DELETE /YES
+
+rem Note: The AT command does not utilize the PATH environment variable.
+rem       Use full path name to the batch file and other commands
+
+

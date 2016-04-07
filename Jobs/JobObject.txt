@@ -1,0 +1,57 @@
+
+CREATE OR REPLACE TYPE SchedulJob AS OBJECT ( 
+   iout int,
+   MEMBER PROCEDURE Add_Job (i out number, SQLstr nvarchar2, interval nvarchar2)  -- method
+
+);
+/
+
+CREATE OR REPLACE TYPE BODY SchedulJob AS 
+   MEMBER PROCEDURE Add_Job(i out number, SQLstr nvarchar2, interval nvarchar2) IS
+   BEGIN
+       dbms_job.submit(i,SQLstr,sysdate,interval);
+       COMMIT;
+       dbms_output.put_line(i);
+   END Add_Job;
+
+END;
+/
+
+
+--example
+DECLARE
+   SchJb SchedulJob;
+   v number;
+BEGIN
+   -- set attribute only
+   SchJb := SchedulJob (6);
+   SchJb.Add_Job (v,'ins_test;', 'sysdate+1/24/60/60');
+   DBMS_JOB.broken (V, TRUE);
+   DBMS_JOB.remove (V);
+   --dbms_output.put_line(v);
+end;
+/
+select * from test;
+
+
+
+
+
+truncate table test;
+drop table test;
+create table test (a varchar2(100));
+
+drop procedure ins_test;
+
+create or replace procedure ins_test
+    as
+     begin
+      insert into test values(to_char(sysdate,'hh24:mi:ss'));
+      commit;
+     end;
+    /
+
+
+
+
+
