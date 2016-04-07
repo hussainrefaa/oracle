@@ -1,0 +1,40 @@
+###########################################
+# Automatic Storage Management
+###########################################
+ _asm_allow_only_raw_disks=false
+ asm_diskgroups='TESTDB_DATA1'
+
+# Default asm_diskstring values for supported platforms:
+#     Solaris (32/64 bit)   /dev/rdsk/*
+#     Windows NT/XP         \\.\orcldisk*
+#     Linux (32/64 bit)     /dev/raw/*
+#     HPUX                  /dev/rdsk/*
+#     HPUX(Tru 64)          /dev/rdisk/*
+#     AIX                   /dev/rhdisk/*
+
+asm_diskstring='c:\asmdisks\*'
+DB_UNIQUE_NAME = +ASM
+
+
+###########################################
+# Diagnostics and Statistics
+###########################################
+background_dump_dest=c:\oracle\product\10.2.0\admin\+ASM\bdump
+core_dump_dest=c:\oracle\product\10.2.0\admin\+ASM\cdump
+user_dump_dest=c:\oracle\product\10.2.0\admin\+ASM\udump
+
+###########################################
+# Miscellaneous
+###########################################
+instance_type=asm
+compatible=10.1.0.4.0
+
+###########################################
+# Pools
+###########################################
+large_pool_size=12M
+
+###########################################
+# Security and Auditing
+###########################################
+remote_login_passwordfile=exclusive

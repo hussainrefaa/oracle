@@ -1,0 +1,33 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+Execute this 2 commands without shutdown the instance:
+ALTER system ARCHIVE LOG STOP;
+ALTER system ARCHIVE LOG START TO 'New Location';
+
+-- change the location of archiving location using
+
+SQL>ALTER SYSTEM set LOG_ARCHIVE_DEST = "c:\TEMP"
+scope = both;
+
+System altered.
+
+SQL> Archive Log List;
+Database log mode Archive Mode
+Automatic archival Enabled
+Archive destination c:\oracle\admin\test\archive
+Oldest online log sequence 161
+Next log sequence to archive 163
+Current log sequence 163
+
+When i check the parameter in OEM console, it still shows the old location ?
+Since the alter command had 'SCOPE' set to 'Both', do i need to recreate
+SPFILE?
+
+
+
