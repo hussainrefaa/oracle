@@ -1,0 +1,153 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2009
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+SQL> -- create demo table
+SQL> create table Employee(
+  2    ID                 VARCHAR2(4 BYTE)         NOT NULL,
+  3    First_Name         VARCHAR2(10 BYTE),
+  4    Last_Name          VARCHAR2(10 BYTE),
+  5    Start_Date         DATE,
+  6    End_Date           DATE,
+  7    Salary             Number(8,2),
+  8    City               VARCHAR2(10 BYTE),
+  9    Description        VARCHAR2(15 BYTE)
+ 10  )
+ 11  /
+
+Table created.
+
+SQL>
+SQL> -- prepare data
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary,  City,       Description)
+  2               values ('01','Jason',    'Martin',  to_date('19960725','YYYYMMDD'), to_date('20060725','YYYYMMDD'), 1234.56, 'Toronto',  'Programmer')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary,  City,       Description)
+  2                values('02','Alison',   'Mathews', to_date('19760321','YYYYMMDD'), to_date('19860221','YYYYMMDD'), 6661.78, 'Vancouver','Tester')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary,  City,       Description)
+  2                values('03','James',    'Smith',   to_date('19781212','YYYYMMDD'), to_date('19900315','YYYYMMDD'), 6544.78, 'Vancouver','Tester')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary,  City,       Description)
+  2                values('04','Celia',    'Rice',    to_date('19821024','YYYYMMDD'), to_date('19990421','YYYYMMDD'), 2344.78, 'Vancouver','Manager')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary,  City,       Description)
+  2                values('05','Robert',   'Black',   to_date('19840115','YYYYMMDD'), to_date('19980808','YYYYMMDD'), 2334.78, 'Vancouver','Tester')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary, City,        Description)
+  2                values('06','Linda',    'Green',   to_date('19870730','YYYYMMDD'), to_date('19960104','YYYYMMDD'), 4322.78,'New York',  'Tester')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary, City,        Description)
+  2                values('07','David',    'Larry',   to_date('19901231','YYYYMMDD'), to_date('19980212','YYYYMMDD'), 7897.78,'New York',  'Manager')
+  3  /
+
+1 row created.
+
+SQL> insert into Employee(ID,  First_Name, Last_Name, Start_Date,                     End_Date,                       Salary, City,        Description)
+  2                values('08','James',    'Cat',     to_date('19960917','YYYYMMDD'), to_date('20020415','YYYYMMDD'), 1232.78,'Vancouver', 'Tester')
+  3  /
+
+1 row created.
+
+SQL>
+SQL>
+SQL>
+SQL> -- display data in the table
+SQL> select * from Employee
+  2  /
+
+ID   FIRST_NAME LAST_NAME  START_DAT END_DATE      SALARY CITY       DESCRIPTION
+---- ---------- ---------- --------- --------- ---------- ---------- ---------------
+01   Jason      Martin     25-JUL-96 25-JUL-06    1234.56 Toronto    Programmer
+02   Alison     Mathews    21-MAR-76 21-FEB-86    6661.78 Vancouver  Tester
+03   James      Smith      12-DEC-78 15-MAR-90    6544.78 Vancouver  Tester
+04   Celia      Rice       24-OCT-82 21-APR-99    2344.78 Vancouver  Manager
+05   Robert     Black      15-JAN-84 08-AUG-98    2334.78 Vancouver  Tester
+06   Linda      Green      30-JUL-87 04-JAN-96    4322.78 New York   Tester
+07   David      Larry      31-DEC-90 12-FEB-98    7897.78 New York   Manager
+08   James      Cat        17-SEP-96 15-APR-02    1232.78 Vancouver  Tester
+
+8 rows selected.
+
+SQL>
+SQL>
+SQL> --  A trigger restricting updates.
+SQL> -- This trigger allows changes to employee records
+SQL> -- only on Mondays through Fridays, and only during
+SQL> -- the hours of 8:00am to 5:00pm.
+SQL>
+SQL>     CREATE OR REPLACE TRIGGER only_during_business_hours
+  2         BEFORE INSERT OR UPDATE OR DELETE ON employee
+  3      BEGIN
+  4         IF  TO_NUMBER(TO_CHAR(SYSDATE,'hh24')) < 8 -- nothing before 8:00am
+  5             OR TO_NUMBER(TO_CHAR(SYSDATE,'hh24')) >= 5
+  6                -- changes must be made BEFORE 5:00pm
+  7              OR TO_CHAR(SYSDATE,'dy') in ('sun','sat') THEN -- nothing on weekends
+  8      RAISE_APPLICATION_ERROR (-20000, 'Employee changes only allowed during business hours.');
+  9      END IF;
+ 10      END;
+ 11      /
+
+Trigger created.
+
+SQL>
+SQL>
+SQL> update employee set first_name = 'asdf';
+update employee set first_name = 'asdf'
+       *
+ERROR at line 1:
+ORA-20000: Employee changes only allowed during business hours.
+ORA-06512: at "JAVA2S.ONLY_DURING_BUSINESS_HOURS", line 6
+ORA-04088: error during execution of trigger 'JAVA2S.ONLY_DURING_BUSINESS_HOURS'
+
+
+SQL>
+SQL> select * from employee;
+
+ID   FIRST_NAME LAST_NAME  START_DAT END_DATE      SALARY CITY       DESCRIPTION
+---- ---------- ---------- --------- --------- ---------- ---------- ---------------
+01   Jason      Martin     25-JUL-96 25-JUL-06    1234.56 Toronto    Programmer
+02   Alison     Mathews    21-MAR-76 21-FEB-86    6661.78 Vancouver  Tester
+03   James      Smith      12-DEC-78 15-MAR-90    6544.78 Vancouver  Tester
+04   Celia      Rice       24-OCT-82 21-APR-99    2344.78 Vancouver  Manager
+05   Robert     Black      15-JAN-84 08-AUG-98    2334.78 Vancouver  Tester
+06   Linda      Green      30-JUL-87 04-JAN-96    4322.78 New York   Tester
+07   David      Larry      31-DEC-90 12-FEB-98    7897.78 New York   Manager
+08   James      Cat        17-SEP-96 15-APR-02    1232.78 Vancouver  Tester
+
+8 rows selected.
+
+SQL>
+SQL>
+SQL> -- clean the table
+SQL> drop table Employee
+  2  /
+
+Table dropped.
+
+SQL>
+SQL>
+SQL>
+SQL>

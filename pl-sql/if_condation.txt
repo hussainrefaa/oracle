@@ -1,0 +1,23 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2009
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+
+DECLARE
+  x        NUMBER;
+BEGIN
+  x := 10;
+  
+  IF x = 10 THEN
+    code1 .....
+  ELSEIF x=9 THEN
+    code2 ....
+  ELSE
+    code3....
+  END IF;
+END;
+/

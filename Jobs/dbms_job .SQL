@@ -1,3 +1,12 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+
 /* *** sample 3 : dbms_job *** */
 drop table job_rec;
 drop procedure insert_log_date;

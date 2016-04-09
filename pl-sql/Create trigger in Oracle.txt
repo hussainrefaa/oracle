@@ -1,0 +1,15 @@
+-- Author: 	Hussain refaa
+-- creation Date: 	2008
+-- Last Updated: 	0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+create table logon_tbl (who varchar2(30), when date);
+
+create or replace trigger trg_logon_db
+  after logon on database
+begin
+  insert into logon_tbl (who, when) values (user, sysdate);
+end;
+/

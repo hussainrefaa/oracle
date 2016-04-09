@@ -1,0 +1,192 @@
+-- ///////////////////////////////////////////////////////////////////
+-- PL/SQL sample source code #1
+-- Author:        Hussain Refaa
+-- Creation Date: 2009-09-03
+-- Last Modified: 0000-00-00
+-- Control Number:	xxxx-xxxx-xxxx-xxxx
+-- Version: 	0.0
+-- Phone : +4915775148443
+-- Email: hus244@gmail.com
+
+create table emp(id   int,
+                 name nvarchar2(32),
+                 age  int);
+
+
+create or replace function test1.addEmp(vId integer,
+                                 vName nvarchar2,
+                                 vAge integer) return integer as
+begin
+  insert into emp values(vId, vName, vAge);
+         commit;
+        return vId;
+end;
+/
+
+declare
+     id int;
+begin
+	      id  :=test1.addEmp(1,'hussain',20);
+        DBMS_OUTPUT.PUT_LINE(id);
+ 
+end;
+/
+
+CREATE OR REPLACE PACKAGE test1.types
+AS
+           TYPE ref_cursor IS REF CURSOR;
+           END;
+
+
+
+
+CREATE OR REPLACE FUNCTION test1.getEmp 
+		  RETURN types.ref_cursor
+as
+
+       emp_cursor types.ref_cursor;
+    BEGIN
+	OPEN emp_cursor FOR 
+       	SELECT id, name, age
+        FROM test1.emp;
+
+        RETURN emp_cursor;
+        CLOSE  emp_cursor;
+    end;
+/
+
+
+declare
+ TYPE ref_cursor IS REF CURSOR;
+        id int;
+        name varchar2(32);
+        age int;
+ emp_cursor ref_cursor;
+begin
+ emp_cursor := test1.getEmp;
+ LOOP
+     FETCH emp_cursor INTO id, name, age;
+     EXIT WHEN emp_cursor%NOTFOUND;
+     dbms_output.put_line(id || ' : ' || name|| ' : ' || age);
+ END LOOP;
+end;
+/
+
+
+
+
+
+////////////////////////////////////////////////////////////
+/// pacakage on oracle 
+CREATE OR REPLACE PACKAGE test1.emp_pkg IS
+
+  
+  PROCEDURE UPDATE_emp(empId integer, newName nvarchar2, newAge nvarchar2);
+  PROCEDURE addEmp(vId integer,vName nvarchar2,
+                                 vAge integer
+                                       );
+  PROCEDURE DELETE_Emp(vId integer);
+
+  FUNCTION getEmp RETURN types.ref_cursor;
+
+
+END emp_pkg;
+
+-----------------------------
+
+CREATE OR REPLACE PACKAGE BODY test1.emp_pkg IS
+
+  PROCEDURE UPDATE_emp(empId integer, newName nvarchar2, newAge nvarchar2) AS
+  BEGIN
+
+    UPDATE emp
+       SET name = newname, age=newAge 
+     WHERE id = empId;
+
+     commit;
+
+  END UPDATE_emp;
+
+  PROCEDURE addEmp(vId integer,vName nvarchar2,
+                                 vAge integer) AS
+  BEGIN
+
+    
+
+    INSERT INTO test1.emp
+    VALUES
+      (vId, vName, vAge);
+
+       commit;
+
+  END addEmp;
+
+  PROCEDURE DELETE_Emp(vId integer) AS
+  BEGIN
+
+    DELETE FROM test1.emp
+     WHERE id = vId;
+
+    commit;
+
+  END DELETE_Emp;
+  
+ FUNCTION  getEmp 
+      RETURN types.ref_cursor
+as
+
+       emp_cursor types.ref_cursor;
+    BEGIN
+  OPEN emp_cursor FOR 
+         SELECT id, name, age
+        FROM test1.emp;
+
+        RETURN emp_cursor;
+        CLOSE  emp_cursor;
+end;
+
+END emp_pkg;
+
+
+
+-------------
+-- test pakage
+
+
+-- test insert 
+begin
+	 emp_pkg.addEmp(2,'hussain',202);
+     
+end;
+
+
+-- test update 
+begin
+	 emp_pkg.UPDATE_emp(2,'samar',202);
+     
+end;
+
+--- test delete
+begin
+	 emp_pkg.DELETE_Emp(2);
+     
+end;
+
+
+-- test get
+
+declare
+ TYPE ref_cursor IS REF CURSOR;
+        id int;
+        name varchar2(32);
+        age int;
+ emp_cursor ref_cursor;
+begin
+ emp_cursor := test1.emp_pkg.getEmp;
+ LOOP
+     FETCH emp_cursor INTO id, name, age;
+     EXIT WHEN emp_cursor%NOTFOUND;
+     dbms_output.put_line(id || ' : ' || name|| ' : ' || age);
+ END LOOP;
+end;
+/
