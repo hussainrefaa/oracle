@@ -1,0 +1,44 @@
+First Soluation
+----------------------------------------------------------------------------------------
+SQL> startup nomount
+ORACLE instance started.
+Total System Global Area 2147483648 bytes
+Fixed Size 2926472 bytes
+Variable Size 1224738936 bytes
+Database Buffers 905969664 bytes
+Redo Buffers 13848576 bytes
+----------------------------------------------------------------------------------------
+SQL> alter database mount;
+Database altered.
+----------------------------------------------------------------------------------------
+SQL> alter database clear unarchived logfile group 1;
+Database altered.
+----------------------------------------------------------------------------------------
+SQL> alter database clear unarchived logfile group 2;
+Database altered.
+----------------------------------------------------------------------------------------
+SQL> alter database clear unarchived logfile group 3;
+Database altered.
+----------------------------------------------------------------------------------------
+SQL> shutdown immediate
+ORA?01109: database not open
+Database dismounted.
+ORACLE instance shut down.
+----------------------------------------------------------------------------------------
+SQL> startup
+ORACLE instance started.
+Total System Global Area 2147483648 bytes
+Fixed Size 2926472 bytes
+Variable Size 1224738936 bytes
+Database Buffers 905969664 bytes
+Redo Buffers 13848576 bytes
+Database mounted.
+Database opened.
+------------------------------------------------------------------------------
+Second Soluation
+------------------------------------------------------------------------------
+The solution is to delete the expired archive log files. So do following,
+$ rman
+RMAN> connect target /
+RMAN> crosscheck archivelog all;
+RMAN> delete expired archivelog all;
