@@ -1,0 +1,35 @@
+Tow cases :
+1. Are you setting up a new dataguard environment and having issues or 
+2.The Environment is there already and was working before but its out of sync.
+These two scenario require a different approach to resolve. 
+Resolve 1. 
+Make sure you have all the setting in the parameter file right. 
+Things like data file convert, archive destination and fal server/client,dg_config. 
+Start the stanby instance, don't mount it. 
+Connect target (Production) and Auxiliary (Standby), 
+then Run:duplicate target database for standby from active database
+Resolve 2.
+You need to find out what is the last archive that was sent to the standby database. 
+and check if all the archives from the sequence number to the current archive are still on disk. 
+If not and they are backed up, then you need to restore the archives to the 
+original destination then oracle will do the rest to resolve the issue
+
+sqlplus / as sysdba ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL;
+ SHUTDOWN IMMEDIATE; 
+ STARTUP NOMOUNT; 
+ ALTER DATABASE MOUNT STANDBY DATABASE; 
+ ALTER DATABASE RECOVER MANAGED STANDBY DATABASE CANCEL; 
+ rman target / RECOVER DATABASE FROM SERVICE PRIM USING COMPRESSED BACKUPSET NOREDO SECTION SIZE 120M; 
+ sqlplus / as sysdba SHUTDOWN IMMEDIATE; 
+ STARTUP NOMOUNT; rman target / RESTORE STANDBY CONTROLFILE FROM SERVICE PRIM; 
+ sqlplus / as sysdba ALTER DATABASE MOUNT STANDBY DATABASE; 
+ rman target / CATALOG START WITH '+DATA/STBY/DATAFILE/'; 
+ SWITCH DATABASE TO COPY; 
+ sqlplus / as sysdba
+ set pages 0 verify off feed off term off echo off
+ spool /tmp/clear.sql 
+ select distinct 'ALTER DATABASE CLEAR LOGFILE GROUP '||GROUP#||';' as cmd from v$logfile; 
+ spool off 
+ @/tmp/clear.sql 
+ ALTER DATABASE RECOVER MANAGED STANDBY DATABASE DISCONNECT FROM SESSION; 
+ 
