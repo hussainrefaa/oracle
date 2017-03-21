@@ -1,10 +1,10 @@
--- Author: 	Hussen refaa
+-- Author: 	Hussain Refaa
 -- creation Date: 	2008
 -- Last Updated: 	0000-00-00
 -- Control Number:	xxxx-xxxx-xxxx-xxxx
 -- Version: 	0.0
 -- Phone : + 4915775148443
--- Email: hus244@gmail.com
+-- Email: refaa.hussain@gmail.com
 
 SELECT &columns
   FROM classes;
@@ -25,4 +25,4 @@ PRINT :where_clause
 
 SELECT first_name, last_name
   FROM students
-  WHERE :where_clause;
+  :where_clause;
