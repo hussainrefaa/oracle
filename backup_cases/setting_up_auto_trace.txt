@@ -1,10 +1,10 @@
--- Author: 	Hussain refaa
+-- Author: 	Hussain Refaa
 -- creation Date: 	2008
 -- Last Updated: 	0000-00-00
 -- Control Number:	xxxx-xxxx-xxxx-xxxx
 -- Version: 	0.0
 -- Phone : +4915775148443
--- Email: hus244@gmail.com
+-- Email: refaa.hussain@gmail.com
 
 
 1. cd [ORACLE_HOME]/rdbms/admin
@@ -30,8 +30,8 @@ of these statements.
 Controlling the Report
 --------------------------------------------------------
 You can control the report by setting the AUTOTRACE system variable:
-• SET AUTOTRACE OFF: No AUTOTRACE report is generated. This is the default.
-• SET AUTOTRACE ON EXPLAIN: The AUTOTRACE report shows only the optimizer
+â€¢ SET AUTOTRACE OFF: No AUTOTRACE report is generated. This is the default.
+â€¢ SET AUTOTRACE ON EXPLAIN: The AUTOTRACE report shows only the optimizer
 execution path.
-• SET AUTOTRACE ON STATISTICS: The AUTOTRACE report shows only the SQL statement
+â€¢ SET AUTOTRACE ON STATISTICS: The AUTOTRACE report shows only the SQL statement
 execution statistics.
