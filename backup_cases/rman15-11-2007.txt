@@ -1,10 +1,10 @@
--- Author: 	Hussain refaa
+-- Author: 	Hussain Refaa
 -- creation Date: 	2008
 -- Last Updated: 	0000-00-00
 -- Control Number:	xxxx-xxxx-xxxx-xxxx
 -- Version: 	0.0
 -- Phone : +4915775148443
--- Email: hus244@gmail.com
+-- Email: refaa.hussain@gmail.com
 
 
 SQL> desc v$database
@@ -244,7 +244,7 @@ Microsoft Windows XP [Version 5.1.2600]
 
 C:\Documents and Settings\hrefaha.MOCT>sqlplus
 
-SQL*Plus: Release 10.1.0.2.0 - Production on ?Ø?Úæ? Ûµ?Ú?? 15 10:32:57 2007
+SQL*Plus: Release 10.1.0.2.0 - Production on ?Ã˜?ÃšÃ¦? Ã›Âµ?Ãš?? 15 10:32:57 2007
 
 Copyright (c) 1982, 2004, Oracle.  All rights reserved.
 
