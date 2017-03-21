@@ -1,10 +1,10 @@
--- Author: 	Hussain refaa
+-- Author: 	Hussain Refaa
 -- creation Date: 	2008
 -- Last Updated: 	0000-00-00
 -- Control Number:	xxxx-xxxx-xxxx-xxxx
 -- Version: 	0.0
 -- Phone : +4915775148443
--- Email: hus244@gmail.com
+-- Email: refaa.hussain@gmail.com
 
 Recovery Manager can operate with or without a recovery catalog
 
@@ -53,7 +53,7 @@ C:>rman catalog=rman/rman target=scott/tiger
 2- connect target scott/tiger@orcl
 3- run {
    allocate channel ch1 type 'SBT_TAPE';
-   backup tablespace TOOLS format promptì%uî;}
+   backup tablespace TOOLS format prompt‚Äú%u‚Äù;}
 
 1- rman nocatalog
 2- connect target scott/tiger@orcl
